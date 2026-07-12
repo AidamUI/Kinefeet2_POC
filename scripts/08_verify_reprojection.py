@@ -1,0 +1,446 @@
+#!/usr/bin/env python3
+"""
+Verify 3D reconstruction quality by back-projecting 3D points onto original images.
+This creates annotated images showing:
+- Original 2D detections (green circles)
+- Back-projected 3D points (red crosses)
+- Reprojection error lines (yellow)
+- Error values in pixels
+"""
+
+import numpy as np
+import cv2
+import json
+import yaml
+from pathlib import Path
+import argparse
+
+
+def load_cameras(cameras_file):
+    """Load all camera parameters from cameras.json."""
+    with open(cameras_file, 'r') as f:
+        return json.load(f)
+
+
+def load_2d_keypoints(keypoints_file):
+    """Load 2D keypoints from JSON."""
+    with open(keypoints_file, 'r') as f:
+        data = json.load(f)
+    
+    # Convert to dict by landmark name
+    keypoints_dict = {}
+    for lm in data['landmarks']:
+        keypoints_dict[lm['name']] = {
+            'x': lm['x_px'],
+            'y': lm['y_px'],
+            'visibility': lm['visibility']
+        }
+    return keypoints_dict
+
+
+def load_3d_joints(joints_file):
+    """Load 3D joints from JSON."""
+    with open(joints_file, 'r') as f:
+        data = json.load(f)
+    
+    # Extract 3D coordinates
+    joints_3d = {}
+    for name, joint_data in data['joints'].items():
+        joints_3d[name] = np.array([joint_data['x'], joint_data['y'], joint_data['z']])
+    
+    return joints_3d, data.get('diagnostics', {})
+
+
+def project_3d_to_2d(point_3d, P):
+    """Project a 3D point to 2D using projection matrix P."""
+    # Convert to homogeneous coordinates
+    point_3d_h = np.append(point_3d, 1.0)
+    
+    # Project
+    point_2d_h = P @ point_3d_h
+    
+    # Convert from homogeneous
+    point_2d = point_2d_h[:2] / point_2d_h[2]
+    
+    return point_2d
+
+
+def calculate_reprojection_error(point_2d_detected, point_2d_projected):
+    """Calculate Euclidean distance between detected and projected points."""
+    return np.linalg.norm(point_2d_detected - point_2d_projected)
+
+
+def draw_reprojection_comparison(image, keypoints_2d, joints_3d, P, 
+                                 landmark_names, show_errors=True):
+    """
+    Draw comparison between original 2D detections and back-projected 3D points.
+    """
+    img_annotated = image.copy()
+    errors = {}
+    
+    for name in landmark_names:
+        if name not in joints_3d or name not in keypoints_2d:
+            continue
+        
+        # Get 2D detection
+        kp_2d = keypoints_2d[name]
+        point_2d_detected = np.array([kp_2d['x'], kp_2d['y']])
+        
+        # Skip if not visible
+        if kp_2d.get('visibility', 1.0) < 0.5:
+            continue
+        
+        # Get 3D point and project it
+        point_3d = joints_3d[name]
+        point_2d_projected = project_3d_to_2d(point_3d, P)
+        
+        # Calculate error
+        error = calculate_reprojection_error(point_2d_detected, point_2d_projected)
+        errors[name] = error
+        
+        # Draw detected point (green circle)
+        cv2.circle(img_annotated, 
+                  tuple(point_2d_detected.astype(int)), 
+                  8, (0, 255, 0), 2)
+        
+        # Draw projected point (red cross)
+        pt_proj = tuple(point_2d_projected.astype(int))
+        cv2.drawMarker(img_annotated, pt_proj, (0, 0, 255), 
+                      cv2.MARKER_CROSS, 12, 2)
+        
+        # Draw error line (yellow)
+        cv2.line(img_annotated,
+                tuple(point_2d_detected.astype(int)),
+                pt_proj,
+                (0, 255, 255), 1)
+        
+        # Show error value
+        if show_errors:
+            text = f"{error:.1f}px"
+            text_pos = tuple((point_2d_detected + point_2d_projected).astype(int) // 2)
+            cv2.putText(img_annotated, text, text_pos,
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
+    
+    return img_annotated, errors
+
+
+def create_error_summary_overlay(image, errors, cam_name):
+    """Create summary statistics overlay on image."""
+    img_with_stats = image.copy()
+    
+    # Calculate statistics
+    error_values = list(errors.values())
+    if not error_values:
+        return img_with_stats
+    
+    mean_error = np.mean(error_values)
+    max_error = np.max(error_values)
+    min_error = np.min(error_values)
+    
+    # Create semi-transparent overlay
+    overlay = img_with_stats.copy()
+    cv2.rectangle(overlay, (10, 10), (400, 180), (0, 0, 0), -1)
+    cv2.addWeighted(overlay, 0.7, img_with_stats, 0.3, 0, img_with_stats)
+    
+    # Add text
+    y_offset = 35
+    cv2.putText(img_with_stats, f"Camera: {cam_name}", (20, y_offset),
+               cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+    
+    y_offset += 30
+    cv2.putText(img_with_stats, "Reprojection Error:", (20, y_offset),
+               cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+    
+    y_offset += 25
+    cv2.putText(img_with_stats, f"Mean: {mean_error:.2f} px", (20, y_offset),
+               cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 1)
+    
+    y_offset += 25
+    cv2.putText(img_with_stats, f"Max:  {max_error:.2f} px", (20, y_offset),
+               cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 1)
+    
+    y_offset += 25
+    cv2.putText(img_with_stats, f"Min:  {min_error:.2f} px", (20, y_offset),
+               cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 1)
+    
+    # Add legend
+    y_offset += 35
+    cv2.circle(img_with_stats, (30, y_offset), 6, (0, 255, 0), 2)
+    cv2.putText(img_with_stats, "= Detected 2D", (45, y_offset + 5),
+               cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
+    
+    y_offset += 20
+    cv2.drawMarker(img_with_stats, (30, y_offset), (0, 0, 255), 
+                  cv2.MARKER_CROSS, 10, 2)
+    cv2.putText(img_with_stats, "= Projected 3D", (45, y_offset + 5),
+               cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
+    
+    return img_with_stats
+
+
+def process_pose(data_dir, pose_name, version, output_dir):
+    """Process a single pose and create reprojection visualizations."""
+    print(f"\nProcessing {version}/{pose_name}...")
+    
+    # Paths
+    input_pose_dir = output_dir / version / pose_name
+    data_pose_dir = data_dir / version / pose_name
+    output_pose_dir = output_dir / version / pose_name / "reprojection_verification"
+    output_pose_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Load 3D joints from OUTPUT directory
+    joints_file = input_pose_dir / "joints_3d.json"
+    if not joints_file.exists():
+        print(f"  [ERROR] joints_3d.json not found at {joints_file}")
+        print(f"  Make sure you've run triangulation first (script 04)")
+        return
+    
+    joints_3d, diagnostics = load_3d_joints(joints_file)
+    print(f"  Loaded {len(joints_3d)} 3D joints")
+    
+    # Load cameras from OUTPUT directory
+    cameras_file = output_dir / version / "cameras.json"
+    if not cameras_file.exists():
+        print(f"  [ERROR] cameras.json not found at {cameras_file}")
+        print(f"  Make sure you've run camera setup (script 03)")
+        return
+    
+    cameras = load_cameras(cameras_file)
+    print(f"  Loaded {len(cameras)} cameras")
+    
+    # Get landmark names
+    landmark_names = list(joints_3d.keys())
+    
+    # Process each camera view
+    keypoints_dir = input_pose_dir / "keypoints_2d"
+    if not keypoints_dir.exists():
+        print(f"  [ERROR] keypoints_2d directory not found")
+        return
+    
+    keypoints_files = sorted(keypoints_dir.glob("*.json"))
+    
+    all_errors = {}
+    
+    for kp_file in keypoints_files:
+        cam_name = kp_file.stem  # e.g., "01", "02", etc.
+        print(f"  Processing camera {cam_name}...")
+        
+        # Get camera parameters - map "01" to "cam_00", "02" to "cam_01", etc.
+        cam_key = f"cam_{int(cam_name) - 1:02d}"
+        if cam_key not in cameras:
+            print(f"    [SKIP] No camera parameters for {cam_key}")
+            continue
+        
+        cam_data = cameras[cam_key]
+        P = np.array(cam_data['P'])  # Projection matrix
+        
+        # Load 2D keypoints
+        keypoints_2d = load_2d_keypoints(kp_file)
+        
+        # Load original image from DATA directory
+        image_patterns = [
+            data_pose_dir / f"{cam_name}.png",
+            data_pose_dir / f"{cam_name}.jpg",
+        ]
+        
+        image_file = None
+        for pattern in image_patterns:
+            if pattern.exists():
+                image_file = pattern
+                break
+        
+        if image_file is None:
+            print(f"    [SKIP] No image found for {cam_name}")
+            continue
+        
+        image = cv2.imread(str(image_file))
+        if image is None:
+            print(f"    [ERROR] Could not load image {image_file}")
+            continue
+        
+        # Create reprojection visualization
+        img_annotated, errors = draw_reprojection_comparison(
+            image, keypoints_2d, joints_3d, P, 
+            landmark_names, show_errors=True
+        )
+        
+        # Add statistics overlay
+        img_with_stats = create_error_summary_overlay(img_annotated, errors, cam_name)
+        
+        # Save
+        output_file = output_pose_dir / f"cam{cam_name}_reprojection.jpg"
+        cv2.imwrite(str(output_file), img_with_stats)
+        
+        # Store errors
+        all_errors[f"cam{cam_name}"] = errors
+        
+        # Print summary
+        if errors:
+            mean_err = np.mean(list(errors.values()))
+            max_err = np.max(list(errors.values()))
+            print(f"    Mean error: {mean_err:.2f}px, Max: {max_err:.2f}px")
+    
+    # Create summary report
+    create_summary_report(all_errors, diagnostics, output_pose_dir, pose_name)
+    
+    print(f"  [SUCCESS] Saved to {output_pose_dir}")
+
+
+def create_summary_report(all_errors, diagnostics, output_dir, pose_name):
+    """Create a text summary report of reprojection errors."""
+    report_file = output_dir / "reprojection_summary.txt"
+    
+    with open(report_file, 'w') as f:
+        f.write(f"Reprojection Error Summary: {pose_name}\n")
+        f.write("=" * 60 + "\n\n")
+        
+        # Per-camera summary
+        f.write("Per-Camera Statistics:\n")
+        f.write("-" * 60 + "\n")
+        
+        for cam_name in sorted(all_errors.keys()):
+            errors = all_errors[cam_name]
+            if not errors:
+                continue
+            
+            error_values = list(errors.values())
+            f.write(f"\n{cam_name}:\n")
+            f.write(f"  Mean error: {np.mean(error_values):.2f} px\n")
+            f.write(f"  Max error:  {np.max(error_values):.2f} px\n")
+            f.write(f"  Min error:  {np.min(error_values):.2f} px\n")
+            f.write(f"  Std dev:    {np.std(error_values):.2f} px\n")
+        
+        # Per-landmark summary
+        f.write("\n\nPer-Landmark Statistics:\n")
+        f.write("-" * 60 + "\n")
+        
+        # Collect errors by landmark
+        landmark_errors = {}
+        for cam_errors in all_errors.values():
+            for landmark, error in cam_errors.items():
+                if landmark not in landmark_errors:
+                    landmark_errors[landmark] = []
+                landmark_errors[landmark].append(error)
+        
+        # Sort by mean error (worst first)
+        sorted_landmarks = sorted(landmark_errors.items(), 
+                                 key=lambda x: np.mean(x[1]), 
+                                 reverse=True)
+        
+        for landmark, errors in sorted_landmarks:
+            f.write(f"\n{landmark}:\n")
+            f.write(f"  Mean: {np.mean(errors):.2f} px\n")
+            f.write(f"  Max:  {np.max(errors):.2f} px\n")
+            f.write(f"  Views: {len(errors)}\n")
+            
+            # Compare with diagnostics if available
+            if diagnostics and landmark in diagnostics:
+                diag = diagnostics[landmark]
+                diag_mean = diag.get('mean_reprojection_error_px', 'N/A')
+                f.write(f"  Diagnostic mean: {diag_mean}\n")
+        
+        # Overall summary
+        f.write("\n\nOverall Summary:\n")
+        f.write("-" * 60 + "\n")
+        
+        all_error_values = []
+        for cam_errors in all_errors.values():
+            all_error_values.extend(cam_errors.values())
+        
+        if all_error_values:
+            f.write(f"Total measurements: {len(all_error_values)}\n")
+            f.write(f"Mean error: {np.mean(all_error_values):.2f} px\n")
+            f.write(f"Max error:  {np.max(all_error_values):.2f} px\n")
+            f.write(f"Min error:  {np.min(all_error_values):.2f} px\n")
+            f.write(f"Std dev:    {np.std(all_error_values):.2f} px\n")
+            
+            # Quality assessment
+            f.write("\nQuality Assessment:\n")
+            mean_err = np.mean(all_error_values)
+            if mean_err < 20:
+                f.write("  EXCELLENT - Mean error < 20px\n")
+            elif mean_err < 50:
+                f.write("  GOOD - Mean error < 50px\n")
+            elif mean_err < 100:
+                f.write("  ACCEPTABLE - Mean error < 100px\n")
+            elif mean_err < 500:
+                f.write("  POOR - Mean error > 100px\n")
+            else:
+                f.write("  UNUSABLE - Mean error > 500px\n")
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Verify 3D reconstruction by back-projecting to 2D images"
+    )
+    parser.add_argument(
+        '--data_dir',
+        type=str,
+        default='../data',
+        help='Data directory containing pose folders'
+    )
+    parser.add_argument(
+        '--output_dir',
+        type=str,
+        default='../output',
+        help='Output directory for verification images'
+    )
+    parser.add_argument(
+        '--pose',
+        type=str,
+        help='Specific pose to process (e.g., pose1). If not specified, processes all poses.'
+    )
+    parser.add_argument(
+        '--version',
+        type=str,
+        default='full_body',
+        choices=['full_body', 'waist_down'],
+        help='Version to process'
+    )
+    
+    args = parser.parse_args()
+    
+    data_dir = Path(args.data_dir)
+    output_dir = Path(args.output_dir)
+    
+    print("=" * 60)
+    print("3D Reconstruction Verification via Back-Reprojection")
+    print("=" * 60)
+    
+    # Determine which poses to process
+    output_version_dir = output_dir / args.version
+    if not output_version_dir.exists():
+        print(f"[ERROR] Directory not found: {output_version_dir}")
+        return
+    
+    if args.pose:
+        poses = [args.pose]
+    else:
+        poses = sorted([d.name for d in output_version_dir.iterdir() 
+                       if d.is_dir() and d.name.startswith('pose')])
+    
+    if not poses:
+        print(f"[ERROR] No poses found in {output_version_dir}")
+        return
+    
+    print(f"\nProcessing {len(poses)} pose(s) from {args.version}...")
+    
+    # Process each pose
+    for pose_name in poses:
+        try:
+            process_pose(data_dir, pose_name, args.version, output_dir)
+        except Exception as e:
+            print(f"[ERROR] Failed to process {pose_name}: {e}")
+            import traceback
+            traceback.print_exc()
+    
+    print("\n" + "=" * 60)
+    print("[SUCCESS] Verification complete!")
+    print(f"Results saved to: {output_dir}")
+    print("=" * 60)
+
+
+if __name__ == "__main__":
+    main()
+
+# Made with Bob
