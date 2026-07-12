@@ -1,6 +1,18 @@
-# Complete Usage Guide
+# Kinefeet 2.0 POC - Complete Usage Guide
 
-This guide provides step-by-step instructions for using the multi-view 3D pose reconstruction pipeline.
+This guide provides step-by-step instructions for using the Kinefeet 2.0 Proof of Concept (POC) - a multi-view 3D reconstruction system for diabetic foot assessment.
+
+## About This POC
+
+This Proof of Concept demonstrates how Kinefeet 2.0 could modernize diabetic foot assessment by using computer vision and 3D reconstruction. Instead of manual measurements and 2D photos, this POC shows how clinicians could:
+
+- Capture 8 photos around a patient in standing position
+- Automatically generate accurate 3D models of feet and lower body
+- Extract objective measurements (distances, angles, volumes)
+- Track changes over time by comparing 3D models
+- Document findings with permanent 3D records
+
+**Key Innovation:** Uses ordinary smartphone cameras and geometric triangulation (the same principle your eyes use to see depth) rather than expensive 3D scanners or depth sensors.
 
 ## Table of Contents
 

@@ -1,10 +1,28 @@
-# Multi-View 3D Pose Reconstruction with MediaPipe
+# Kinefeet 2.0 - Multi-View 3D Foot Reconstruction
 
-A complete pipeline for reconstructing 3D human body poses and meshes from multi-angle photographs using MediaPipe Pose detection and geometric triangulation.
+**Proof of Concept: Next-generation diabetic foot assessment using computer vision and 3D reconstruction**
+
+## Project Background
+
+Kinefeet is a diabetic foot assessment tool designed to help healthcare providers monitor foot deformities and complications in diabetic patients. Traditional Kinefeet uses manual measurements and 2D photography, which can be time-consuming and subjective.
+
+**This is a Proof of Concept (POC)** for Kinefeet 2.0, which aims to modernize diabetic foot assessment using multi-view 3D reconstruction technology. By capturing photos from multiple angles and using computer vision, we can create accurate 3D models of patients' feet and lower body, enabling:
+
+- **Objective measurements** - Precise 3D distances, angles, and volumes
+- **Progress tracking** - Compare 3D models over time to detect changes
+- **Remote assessment** - 3D models can be analyzed without patient present
+- **Clinical documentation** - Permanent 3D records for medical files
 
 ## Overview
 
-This system converts ordinary photos taken from multiple angles around a person into accurate 3D skeletal reconstructions and realistic body meshes. The approach uses geometric triangulation - the same principle your eyes use to perceive depth - rather than AI-based depth estimation.
+This system converts ordinary photos taken from multiple angles into accurate 3D skeletal reconstructions and realistic body meshes. The approach uses geometric triangulation - the same principle your eyes use to perceive depth - rather than AI-based depth estimation.
+
+**Clinical Applications:**
+- Diabetic foot deformity assessment (arch collapse, toe deformities)
+- Lower limb alignment analysis (pronation, supination)
+- Wound location and size documentation
+- Gait analysis preparation
+- Pre/post-surgical comparison
 
 **Key Features:**
 - Multi-view 2D pose detection using MediaPipe
@@ -20,6 +38,27 @@ This system converts ordinary photos taken from multiple angles around a person 
 - Interactive HTML visualizations
 - Annotated 2D detection images
 - Detailed accuracy metrics
+
+## Use Cases
+
+### Full Body Mode
+Captures entire body from head to toe. Useful for:
+- Overall posture and alignment assessment
+- Gait preparation (understanding full body mechanics)
+- Comprehensive diabetic complication screening
+- Research and documentation
+
+### Waist-Down Mode
+Focuses on lower body and feet. Ideal for:
+- **Diabetic foot assessment** (primary use case)
+- Detailed foot deformity analysis
+- Lower limb alignment studies
+- Faster processing (fewer landmarks to track)
+
+**Protocol:** Capture 3 different poses for each mode to assess:
+- Pose 1: Natural standing position
+- Pose 2: Weight-bearing variation
+- Pose 3: Alternative stance or specific clinical position
 
 ## Quick Start
 
@@ -78,16 +117,37 @@ Results appear in `output/full_body/pose1/` (and pose2, pose3):
 
 ## How It Works
 
-### The Triangulation Principle
+### The Kinefeet 2.0 Pipeline
 
-When you know exactly where two (or more) cameras are positioned and where a point appears in each camera's image, you can calculate that point's exact 3D location geometrically. This is the same principle stereo vision uses.
+This system uses a 4-step process to convert photos into 3D models:
 
-**The Pipeline:**
+1. **Photo Capture** - Take 8 photos around the subject at 45° intervals
+   - Subject holds completely still in standing position
+   - Same camera, same height, same distance for all shots
+   - Captures full body OR waist-down (for focused foot assessment)
 
-1. **2D Detection** - MediaPipe finds 33 body landmarks in each photo
-2. **Camera Setup** - Your measurements define exact camera positions
-3. **Triangulation** - Geometric calculation finds 3D position of each joint
-4. **Mesh Generation** - Skeleton is converted to realistic body surface
+2. **2D Pose Detection** - MediaPipe analyzes each photo
+   - Detects 33 body landmarks (including 6 foot landmarks per foot)
+   - Provides pixel coordinates for each joint in each image
+   - Works with ordinary smartphone photos
+
+3. **3D Triangulation** - Geometric reconstruction
+   - Uses camera positions and 2D detections from all 8 views
+   - Calculates exact 3D coordinates for each joint
+   - Same principle as stereo vision (how your eyes see depth)
+
+4. **Mesh Generation** - Creates realistic 3D body surface
+   - Converts skeleton to smooth, anatomically correct mesh
+   - ~5,000 vertices for detailed surface representation
+   - Suitable for clinical measurements and visualization
+
+### Why Multi-View?
+
+Single photos can't capture depth. By using 8 cameras positioned around the subject, we can:
+- Triangulate accurate 3D positions (like how your two eyes perceive depth)
+- Capture the complete foot/body from all angles
+- Achieve millimeter-level accuracy for clinical measurements
+- Work with ordinary cameras (no depth sensors needed)
 
 ### Accuracy Factors
 
