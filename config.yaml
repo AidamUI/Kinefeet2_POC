@@ -1,0 +1,48 @@
+# =============================================================================
+# config.yaml - central settings for the whole pipeline
+# =============================================================================
+# Edit the numbers in `rig:` to match how YOU actually shot your photos.
+# Everything else has sensible defaults.
+
+camera:
+  # Only used if you did NOT run 01_calibrate_camera.py. Most phone main
+  # cameras (not the ultra-wide or telephoto lens) are roughly 60-75 deg
+  # horizontal field of view. Check your phone model online for a better
+  # number, or just run the checkerboard calibration for real accuracy.
+  assumed_fov_deg: 65
+
+rig:
+  full_body:
+    angles_deg: [0, 45, 90, 135, 180, 225, 270, 315]
+    radius_m: 3.5          # Change from 2.5 to 3.5 (estimated distance)
+    camera_height_m: 1.1   # Keep as is (looks correct)
+    target_height_m: 1.2   # Change from 0.9 to 1.2 (chest level)
+
+
+# rig:
+#   # ---- FULL BODY capture ----
+#   # angles_deg: the shooting angle of each photo, in the order your photo
+#   # filenames sort alphabetically (see README naming convention, e.g.
+#   # 01.jpg, 02.jpg, ... 08.jpg = 0, 45, 90, 135, 180, 225, 270, 315 deg).
+#   full_body:
+#     angles_deg: [0, 45, 90, 135, 180, 225, 270, 315]
+#     radius_m: 2.5          # distance from camera to the subject's center line
+#     camera_height_m: 1.1   # height of the camera lens off the floor
+#     target_height_m: 0.9   # height on the subject the camera was aimed at (~navel)
+
+  # ---- WAIST-DOWN capture ----
+  # Typically shot closer and lower since you're only framing hips-to-feet.
+  waist_down:
+    angles_deg: [0, 45, 90, 135, 180, 225, 270, 315]
+    radius_m: 1.5
+    camera_height_m: 0.55
+    target_height_m: 0.45  # roughly mid-thigh
+
+triangulation:
+  # A landmark is only used from a photo if MediaPipe's visibility score
+  # for it is at least this. Visibility ~0-1, where MediaPipe is unsure
+  # about occluded/out-of-frame joints.
+  min_visibility: 0.5
+  # A landmark needs at least this many usable photos to be triangulated
+  # at all. 2 is the mathematical minimum; 3+ is more robust to noise.
+  min_views: 3

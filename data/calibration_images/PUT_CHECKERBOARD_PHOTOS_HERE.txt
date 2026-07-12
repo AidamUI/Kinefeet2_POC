@@ -1,0 +1,5 @@
+Optional: put 10-20 photos of a printed checkerboard pattern here
+(same camera/lens as your body photos) if you want precise camera
+calibration via 01_calibrate_camera.py. See README.md for details.
+If you skip this, the pipeline still works using an approximate
+field-of-view based intrinsic matrix.

@@ -1,0 +1,11 @@
+Put your 8 waist-down photos for POSE 1 here, named so they sort in
+angle order, e.g.:
+  01.jpg  (0 deg)
+  02.jpg  (45 deg)
+  03.jpg  (90 deg)
+  04.jpg  (135 deg)
+  05.jpg  (180 deg)
+  06.jpg  (225 deg)
+  07.jpg  (270 deg)
+  08.jpg  (315 deg)
+See the README.md in the project root for full shooting instructions.

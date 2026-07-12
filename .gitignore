@@ -1,0 +1,106 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Project-specific
+# Output files (keep structure, ignore content)
+output/*
+!output/.gitkeep
+
+# Data files (keep structure, ignore photos)
+# data/calibration_images/*.jpg
+# data/calibration_images/*.jpeg
+# data/calibration_images/*.png
+# data/full_body/pose1/*.jpg
+# data/full_body/pose1/*.jpeg
+# data/full_body/pose1/*.png
+# data/full_body/pose2/*.jpg
+# data/full_body/pose2/*.jpeg
+# data/full_body/pose2/*.png
+# data/full_body/pose3/*.jpg
+# data/full_body/pose3/*.jpeg
+# data/full_body/pose3/*.png
+# data/waist_down/pose1/*.jpg
+# data/waist_down/pose1/*.jpeg
+# data/waist_down/pose1/*.png
+# data/waist_down/pose2/*.jpg
+# data/waist_down/pose2/*.jpeg
+# data/waist_down/pose2/*.png
+# data/waist_down/pose3/*.jpg
+# data/waist_down/pose3/*.jpeg
+# data/waist_down/pose3/*.png
+
+# Keep placeholder files
+!data/**/PUT_*.txt
+
+# SMPL Models (large files, user must download)
+smpl_models/smplx/*.npz
+smpl_models/smplx/*.pkl
+
+# MediaPipe models (auto-downloaded)
+models/*.task
+models/*.tflite
+
+# Temporary files
+*.tmp
+*.temp
+.cleanup_notes.txt
+
+# Logs
+*.log
+
+# OS
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Documentation builds
+docs/_build/
+site/
+
+# Made with Bob
