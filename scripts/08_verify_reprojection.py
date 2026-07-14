@@ -42,12 +42,18 @@ def load_3d_joints(joints_file):
     """Load 3D joints from JSON."""
     with open(joints_file, 'r') as f:
         data = json.load(f)
-    
-    # Extract 3D coordinates
+
     joints_3d = {}
+    skipped = []
     for name, joint_data in data['joints'].items():
+        if joint_data is None or joint_data.get('x') is None:
+            skipped.append(name)
+            continue
         joints_3d[name] = np.array([joint_data['x'], joint_data['y'], joint_data['z']])
-    
+
+    if skipped:
+        print(f"  [WARN] {len(skipped)} joint(s) missing 3D data (not triangulated): {', '.join(skipped)}")
+
     return joints_3d, data.get('diagnostics', {})
 
 
@@ -241,6 +247,7 @@ def process_pose(data_dir, pose_name, version, output_dir):
         image_patterns = [
             data_pose_dir / f"{cam_name}.png",
             data_pose_dir / f"{cam_name}.jpg",
+            data_pose_dir / f"{cam_name}.jpeg",
         ]
         
         image_file = None

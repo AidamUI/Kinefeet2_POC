@@ -23,6 +23,7 @@ STEPS = [
     "03_setup_camera_rig.py",
     "04_triangulate_3d.py",
     "05_export_and_visualize.py",
+    "08_verify_reprojection.py",
 ]
 
 
