@@ -14,7 +14,7 @@ camera:
 rig:
   full_body:
     angles_deg: [0, 45, 90, 135, 180, 225, 270, 315]
-    radius_m: 3.5          # Change from 2.5 to 3.5 (estimated distance)
+    radius_m: 2          # Change from 2.5 to 3.5 (estimated distance)
     camera_height_m: 1.1   # Keep as is (looks correct)
     target_height_m: 1.2   # Change from 0.9 to 1.2 (chest level)
 
@@ -22,7 +22,7 @@ rig:
 # rig:
 #   # ---- FULL BODY capture ----
 #   # angles_deg: the shooting angle of each photo, in the order your photo
-#   # filenames sort alphabetically (see README naming convention, e.g.
+#   # filenames sort alphabetically (see README naming convention, e.g. 
 #   # 01.jpg, 02.jpg, ... 08.jpg = 0, 45, 90, 135, 180, 225, 270, 315 deg).
 #   full_body:
 #     angles_deg: [0, 45, 90, 135, 180, 225, 270, 315]
@@ -34,15 +34,15 @@ rig:
   # Typically shot closer and lower since you're only framing hips-to-feet.
   waist_down:
     angles_deg: [0, 45, 90, 135, 180, 225, 270, 315]
-    radius_m: 1.5
-    camera_height_m: 0.55
-    target_height_m: 0.45  # roughly mid-thigh
+    radius_m: 1.2
+    camera_height_m: 1.1
+    target_height_m: 1.2  # roughly mid-thigh
 
 triangulation:
   # A landmark is only used from a photo if MediaPipe's visibility score
   # for it is at least this. Visibility ~0-1, where MediaPipe is unsure
   # about occluded/out-of-frame joints.
-  min_visibility: 0.5
+  min_visibility: 0.2
   # A landmark needs at least this many usable photos to be triangulated
   # at all. 2 is the mathematical minimum; 3+ is more robust to noise.
   min_views: 3
