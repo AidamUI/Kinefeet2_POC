@@ -42,7 +42,7 @@ triangulation:
   # A landmark is only used from a photo if MediaPipe's visibility score
   # for it is at least this. Visibility ~0-1, where MediaPipe is unsure
   # about occluded/out-of-frame joints.
-  min_visibility: 0.2
+  min_visibility: 0.1
   # A landmark needs at least this many usable photos to be triangulated
   # at all. 2 is the mathematical minimum; 3+ is more robust to noise.
   min_views: 3
