@@ -86,6 +86,15 @@ def make_detector_new_api():
 
     return detect
 
+def pad_for_detection(img, pad_ratio=1.3):
+    """Add blank space above the image so a partial-body crop
+    looks proportioned like a full body to MediaPipe's detector."""
+    h, w = img.shape[:2]
+    pad_top = int(h * pad_ratio)
+    padded = np.full((h + pad_top, w, 3), 128, dtype=np.uint8)  # neutral gray
+    padded[pad_top:, :, :] = img
+    return padded, pad_top
+
 
 def make_detector_legacy_api():
     """Older MediaPipe (<0.10) mp.solutions.pose API, kept as a fallback."""
@@ -148,14 +157,21 @@ def process_folder(detect_fn, version, pose_name):
             continue
         h, w = img.shape[:2]
 
-        landmarks_norm = detect_fn(img)
+        if version == "waist_down":
+            padded_img, pad_top = pad_for_detection(img)
+            landmarks_norm = detect_fn(padded_img)
+            if landmarks_norm is not None:
+                ph, pw = padded_img.shape[:2]
+                landmarks_px = [(x * pw, y * ph - pad_top, v) for (x, y, v) in landmarks_norm]
+        else:
+            landmarks_norm = detect_fn(img)
+            if landmarks_norm is not None:
+                landmarks_px = [(x * w, y * h, v) for (x, y, v) in landmarks_norm]
+
         if landmarks_norm is None:
             print(f"  [!] NO POSE DETECTED: {os.path.basename(path)}  "
                   f"(retake this photo, or check lighting/framing)")
             continue
-
-        # Convert normalized [0,1] coords to pixel coords for this image.
-        landmarks_px = [(x * w, y * h, v) for (x, y, v) in landmarks_norm]
 
         record = {
             "image": os.path.basename(path),

@@ -241,6 +241,7 @@ def process_pose(data_dir, pose_name, version, output_dir):
         image_patterns = [
             data_pose_dir / f"{cam_name}.png",
             data_pose_dir / f"{cam_name}.jpg",
+            data_pose_dir / f"{cam_name}.jpeg",
         ]
         
         image_file = None
@@ -369,6 +370,34 @@ def create_summary_report(all_errors, diagnostics, output_dir, pose_name):
                 f.write("  UNUSABLE - Mean error > 500px\n")
 
 
+def process_version(version, data_dir, output_dir, pose_arg):
+    """Process all (or one) pose(s) for a single version (full_body / waist_down)."""
+    output_version_dir = output_dir / version
+    if not output_version_dir.exists():
+        print(f"[ERROR] Directory not found: {output_version_dir}")
+        return
+
+    if pose_arg:
+        poses = [pose_arg]
+    else:
+        poses = sorted([d.name for d in output_version_dir.iterdir()
+                       if d.is_dir() and d.name.startswith('pose')])
+
+    if not poses:
+        print(f"[ERROR] No poses found in {output_version_dir}")
+        return
+
+    print(f"\nProcessing {len(poses)} pose(s) from {version}...")
+
+    for pose_name in poses:
+        try:
+            process_pose(data_dir, pose_name, version, output_dir)
+        except Exception as e:
+            print(f"[ERROR] Failed to process {pose_name}: {e}")
+            import traceback
+            traceback.print_exc()
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Verify 3D reconstruction by back-projecting to 2D images"
@@ -393,9 +422,9 @@ def main():
     parser.add_argument(
         '--version',
         type=str,
-        default='full_body',
+        default=None,
         choices=['full_body', 'waist_down'],
-        help='Version to process'
+        help='Version to process. If not specified, processes BOTH full_body and waist_down.'
     )
     
     args = parser.parse_args()
@@ -406,34 +435,12 @@ def main():
     print("=" * 60)
     print("3D Reconstruction Verification via Back-Reprojection")
     print("=" * 60)
-    
-    # Determine which poses to process
-    output_version_dir = output_dir / args.version
-    if not output_version_dir.exists():
-        print(f"[ERROR] Directory not found: {output_version_dir}")
-        return
-    
-    if args.pose:
-        poses = [args.pose]
-    else:
-        poses = sorted([d.name for d in output_version_dir.iterdir() 
-                       if d.is_dir() and d.name.startswith('pose')])
-    
-    if not poses:
-        print(f"[ERROR] No poses found in {output_version_dir}")
-        return
-    
-    print(f"\nProcessing {len(poses)} pose(s) from {args.version}...")
-    
-    # Process each pose
-    for pose_name in poses:
-        try:
-            process_pose(data_dir, pose_name, args.version, output_dir)
-        except Exception as e:
-            print(f"[ERROR] Failed to process {pose_name}: {e}")
-            import traceback
-            traceback.print_exc()
-    
+
+    versions = [args.version] if args.version else ['full_body', 'waist_down']
+
+    for version in versions:
+        process_version(version, data_dir, output_dir, args.pose)
+
     print("\n" + "=" * 60)
     print("[SUCCESS] Verification complete!")
     print(f"Results saved to: {output_dir}")
@@ -442,5 +449,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-# Made with Bob
