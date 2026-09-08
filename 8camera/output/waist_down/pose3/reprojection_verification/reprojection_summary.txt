@@ -1,0 +1,93 @@
+Reprojection Error Summary: pose3
+============================================================
+
+Per-Camera Statistics:
+------------------------------------------------------------
+
+cam01:
+  Mean error: 36.92 px
+  Max error:  137.59 px
+  Min error:  2.51 px
+  Std dev:    40.50 px
+
+cam03:
+  Mean error: 78.04 px
+  Max error:  102.80 px
+  Min error:  53.28 px
+  Std dev:    24.76 px
+
+
+Per-Landmark Statistics:
+------------------------------------------------------------
+
+left_hip:
+  Mean: 120.20 px
+  Max:  137.59 px
+  Views: 2
+  Diagnostic mean: 92.4950413464033
+
+right_hip:
+  Mean: 69.27 px
+  Max:  85.26 px
+  Views: 2
+  Diagnostic mean: 59.506845829442
+
+left_ankle:
+  Mean: 34.24 px
+  Max:  34.24 px
+  Views: 1
+  Diagnostic mean: 100.02750593824096
+
+right_foot_index:
+  Mean: 31.32 px
+  Max:  31.32 px
+  Views: 1
+  Diagnostic mean: 134.91670190816822
+
+left_heel:
+  Mean: 26.74 px
+  Max:  26.74 px
+  Views: 1
+  Diagnostic mean: 111.92506378440028
+
+right_knee:
+  Mean: 26.42 px
+  Max:  26.42 px
+  Views: 1
+  Diagnostic mean: 150.56408464505353
+
+left_knee:
+  Mean: 11.41 px
+  Max:  11.41 px
+  Views: 1
+  Diagnostic mean: 41.775471034946726
+
+left_foot_index:
+  Mean: 11.15 px
+  Max:  11.15 px
+  Views: 1
+  Diagnostic mean: 105.73235268108112
+
+right_heel:
+  Mean: 2.60 px
+  Max:  2.60 px
+  Views: 1
+  Diagnostic mean: 84.71450050943973
+
+right_ankle:
+  Mean: 2.51 px
+  Max:  2.51 px
+  Views: 1
+  Diagnostic mean: 92.29426342973454
+
+
+Overall Summary:
+------------------------------------------------------------
+Total measurements: 12
+Mean error: 43.78 px
+Max error:  137.59 px
+Min error:  2.51 px
+Std dev:    41.28 px
+
+Quality Assessment:
+  GOOD - Mean error < 50px

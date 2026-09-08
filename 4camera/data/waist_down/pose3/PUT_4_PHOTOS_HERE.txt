@@ -1,0 +1,5 @@
+Place your 4 photos here:
+- 01.jpg = 0° (front view)
+- 02.jpg = 90° (right side view)
+- 03.jpg = 180° (back view)
+- 04.jpg = 270° (left side view)

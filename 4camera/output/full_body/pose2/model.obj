@@ -1,0 +1,51 @@
+# 3D body skeleton exported from MediaPipe multi-view triangulation
+# vertices = joints, lines = bones
+v -0.23894 -0.04512 3.36448  # nose
+v 0.28880 0.21269 2.89678  # left_shoulder
+v -0.31174 -0.50227 2.91770  # right_shoulder
+v 0.30535 1.66714 2.70761  # left_elbow
+v -0.92008 -1.13302 2.82765  # right_elbow
+v 0.24605 2.74412 2.49037  # left_wrist
+v -0.83460 -1.65990 3.29625  # right_wrist
+v 0.35672 2.73915 2.48375  # left_pinky
+v -0.83352 -1.87695 3.44926  # right_pinky
+v 0.36800 2.72199 2.55632  # left_index
+v -0.82786 -1.89204 3.46889  # right_index
+v 0.26550 2.96604 2.46433  # left_thumb
+v -0.77580 -1.62281 3.42815  # right_thumb
+v 11.76941 -15.42693 1.81134  # left_hip
+v 2.25911 -4.22340 1.56504  # right_hip
+v -0.30333 1.88416 -0.92647  # left_knee
+v -3.71378 2.62487 -2.38559  # right_knee
+v -0.81415 1.92418 -3.40633  # left_ankle
+v -0.39392 0.92271 -2.10199  # right_ankle
+v -0.38138 1.05365 -3.20576  # left_heel
+v -0.63446 0.76353 -2.87380  # right_heel
+v -1.05579 2.00204 -4.02984  # left_foot_index
+v -0.34341 0.69470 -2.60725  # right_foot_index
+l 2 3
+l 2 4
+l 4 6
+l 6 8
+l 6 10
+l 6 12
+l 8 10
+l 3 5
+l 5 7
+l 7 9
+l 7 11
+l 7 13
+l 9 11
+l 2 14
+l 3 15
+l 14 15
+l 14 16
+l 15 17
+l 16 18
+l 17 19
+l 18 20
+l 19 21
+l 20 22
+l 21 23
+l 18 22
+l 19 23

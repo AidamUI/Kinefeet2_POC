@@ -1,0 +1,20 @@
+# 3D body skeleton exported from MediaPipe multi-view triangulation
+# vertices = joints, lines = bones
+v 0.09918 -0.03368 1.07388  # left_hip
+v -0.07210 -0.09569 1.05371  # right_hip
+v -0.08478 -0.27940 0.49269  # right_knee
+v -0.36147 -0.03680 -0.28705  # left_ankle
+v -0.25626 0.05913 -0.30511  # right_ankle
+v -0.36248 0.03286 -0.41570  # left_heel
+v -0.33544 0.05087 -0.31922  # right_heel
+v -0.27093 0.02175 -0.43562  # left_foot_index
+v -0.29177 0.07032 -0.50878  # right_foot_index
+l 1 2
+l 2 3
+l 3 5
+l 4 6
+l 5 7
+l 6 8
+l 7 9
+l 4 8
+l 5 9

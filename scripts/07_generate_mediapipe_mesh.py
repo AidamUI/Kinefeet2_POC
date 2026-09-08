@@ -462,6 +462,9 @@ def main():
     landmarks = np.zeros((33, 3))
     
     for joint_name, joint_data in joints_dict.items():
+        # Skip joints that couldn't be triangulated (stored as None)
+        if joint_data is None:
+            continue
         idx = joint_data['index']
         landmarks[idx] = [joint_data['x'], joint_data['y'], joint_data['z']]
     
@@ -539,20 +542,35 @@ def main():
     ax.set_zlabel('Z')
     ax.set_title(f'MediaPipe Body Mesh - {data["version"]} {data["pose"]}')
     
-    # Set equal aspect ratio
-    max_range = np.array([
-        vertices[:, 0].max() - vertices[:, 0].min(),
-        vertices[:, 1].max() - vertices[:, 1].min(),
-        vertices[:, 2].max() - vertices[:, 2].min()
-    ]).max() / 2.0
-    
-    mid_x = (vertices[:, 0].max() + vertices[:, 0].min()) * 0.5
-    mid_y = (vertices[:, 1].max() + vertices[:, 1].min()) * 0.5
-    mid_z = (vertices[:, 2].max() + vertices[:, 2].min()) * 0.5
-    
-    ax.set_xlim(mid_x - max_range, mid_x + max_range)
-    ax.set_ylim(mid_y - max_range, mid_y + max_range)
-    ax.set_zlim(mid_z - max_range, mid_z + max_range)
+    # Set equal aspect ratio - handle NaN/Inf values
+    try:
+        # Filter out NaN and Inf values
+        valid_vertices = vertices[np.isfinite(vertices).all(axis=1)]
+        
+        if len(valid_vertices) == 0:
+            print("Warning: No valid vertices for preview, using default view")
+            max_range = 1.0
+            mid_x, mid_y, mid_z = 0.0, 0.0, 0.0
+        else:
+            max_range = np.array([
+                valid_vertices[:, 0].max() - valid_vertices[:, 0].min(),
+                valid_vertices[:, 1].max() - valid_vertices[:, 1].min(),
+                valid_vertices[:, 2].max() - valid_vertices[:, 2].min()
+            ]).max() / 2.0
+            
+            # Handle case where max_range is 0 or NaN
+            if not np.isfinite(max_range) or max_range == 0:
+                max_range = 1.0
+            
+            mid_x = (valid_vertices[:, 0].max() + valid_vertices[:, 0].min()) * 0.5
+            mid_y = (valid_vertices[:, 1].max() + valid_vertices[:, 1].min()) * 0.5
+            mid_z = (valid_vertices[:, 2].max() + valid_vertices[:, 2].min()) * 0.5
+        
+        ax.set_xlim(mid_x - max_range, mid_x + max_range)
+        ax.set_ylim(mid_y - max_range, mid_y + max_range)
+        ax.set_zlim(mid_z - max_range, mid_z + max_range)
+    except Exception as e:
+        print(f"Warning: Could not set axis limits ({e}), using defaults")
     
     # Set viewing angle
     ax.view_init(elev=20, azim=45)

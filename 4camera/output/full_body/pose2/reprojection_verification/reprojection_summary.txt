@@ -1,0 +1,183 @@
+Reprojection Error Summary: pose2
+============================================================
+
+Per-Camera Statistics:
+------------------------------------------------------------
+
+cam01:
+  Mean error: 219.76 px
+  Max error:  3900.27 px
+  Min error:  4.25 px
+  Std dev:    785.72 px
+
+cam02:
+  Mean error: 64.10 px
+  Max error:  161.12 px
+  Min error:  13.56 px
+  Std dev:    45.17 px
+
+cam03:
+  Mean error: 138.06 px
+  Max error:  243.43 px
+  Min error:  33.10 px
+  Std dev:    50.04 px
+
+cam04:
+  Mean error: 65.31 px
+  Max error:  254.18 px
+  Min error:  10.93 px
+  Std dev:    67.78 px
+
+
+Per-Landmark Statistics:
+------------------------------------------------------------
+
+right_hip:
+  Mean: 1061.99 px
+  Max:  3900.27 px
+  Views: 4
+  Diagnostic mean: 1061.994018749454
+
+right_heel:
+  Mean: 145.69 px
+  Max:  243.43 px
+  Views: 2
+  Diagnostic mean: 133.13338569780402
+
+left_hip:
+  Mean: 140.80 px
+  Max:  184.19 px
+  Views: 4
+  Diagnostic mean: 140.79545614395684
+
+left_heel:
+  Mean: 105.01 px
+  Max:  208.32 px
+  Views: 3
+  Diagnostic mean: 146.2664525691198
+
+right_ankle:
+  Mean: 93.21 px
+  Max:  161.12 px
+  Views: 2
+  Diagnostic mean: 112.60111286566516
+
+right_foot_index:
+  Mean: 87.07 px
+  Max:  141.91 px
+  Views: 2
+  Diagnostic mean: 101.44717045758358
+
+right_pinky:
+  Mean: 86.48 px
+  Max:  180.34 px
+  Views: 3
+  Diagnostic mean: 86.48494117300125
+
+right_index:
+  Mean: 85.59 px
+  Max:  180.09 px
+  Views: 3
+  Diagnostic mean: 85.58557183380891
+
+right_shoulder:
+  Mean: 82.28 px
+  Max:  133.64 px
+  Views: 4
+  Diagnostic mean: 82.28330864174231
+
+right_wrist:
+  Mean: 81.52 px
+  Max:  168.99 px
+  Views: 3
+  Diagnostic mean: 81.51702551377616
+
+right_elbow:
+  Mean: 79.70 px
+  Max:  135.63 px
+  Views: 3
+  Diagnostic mean: 79.69602955626334
+
+left_wrist:
+  Mean: 70.81 px
+  Max:  134.68 px
+  Views: 3
+  Diagnostic mean: 70.81062418082603
+
+left_elbow:
+  Mean: 70.64 px
+  Max:  122.93 px
+  Views: 3
+  Diagnostic mean: 70.64449840151059
+
+left_index:
+  Mean: 69.73 px
+  Max:  107.75 px
+  Views: 3
+  Diagnostic mean: 69.72779931629279
+
+left_pinky:
+  Mean: 69.38 px
+  Max:  109.47 px
+  Views: 3
+  Diagnostic mean: 69.37600381080368
+
+left_shoulder:
+  Mean: 68.10 px
+  Max:  133.53 px
+  Views: 4
+  Diagnostic mean: 68.09933569278962
+
+nose:
+  Mean: 61.87 px
+  Max:  122.13 px
+  Views: 4
+  Diagnostic mean: 61.86761830092196
+
+left_ankle:
+  Mean: 44.52 px
+  Max:  51.81 px
+  Views: 2
+  Diagnostic mean: 143.6033966020552
+
+right_thumb:
+  Mean: 35.32 px
+  Max:  38.07 px
+  Views: 2
+  Diagnostic mean: 85.70319236587189
+
+left_foot_index:
+  Mean: 27.81 px
+  Max:  38.24 px
+  Views: 2
+  Diagnostic mean: 342.41300445457017
+
+left_knee:
+  Mean: 20.31 px
+  Max:  22.05 px
+  Views: 2
+  Diagnostic mean: 97.03813699383845
+
+left_thumb:
+  Mean: 14.76 px
+  Max:  14.76 px
+  Views: 1
+  Diagnostic mean: 69.46456982990507
+
+right_knee:
+  Mean: 4.25 px
+  Max:  4.25 px
+  Views: 1
+  Diagnostic mean: 2301.7623714829256
+
+
+Overall Summary:
+------------------------------------------------------------
+Total measurements: 63
+Mean error: 138.79 px
+Max error:  3900.27 px
+Min error:  4.25 px
+Std dev:    481.55 px
+
+Quality Assessment:
+  POOR - Mean error > 100px

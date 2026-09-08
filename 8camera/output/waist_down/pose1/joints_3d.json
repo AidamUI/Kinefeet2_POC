@@ -1,0 +1,193 @@
+{
+  "pose": "pose1",
+  "version": "waist_down",
+  "joints": {
+    "left_hip": {
+      "index": 23,
+      "x": 0.151447228088159,
+      "y": 0.06997602306344443,
+      "z": 1.2067528227228503
+    },
+    "right_hip": {
+      "index": 24,
+      "x": -0.03880659309057114,
+      "y": -0.062140636192085416,
+      "z": 1.2251657268240148
+    },
+    "left_knee": {
+      "index": 25,
+      "x": 0.07580834188468265,
+      "y": 0.048581196460778124,
+      "z": 0.5567855222385506
+    },
+    "right_knee": {
+      "index": 26,
+      "x": -0.2914468647953381,
+      "y": 0.0011999575524536496,
+      "z": 0.5184564173266409
+    },
+    "left_ankle": {
+      "index": 27,
+      "x": -0.04906054833571245,
+      "y": 0.21203916599904485,
+      "z": -0.2182195129831056
+    },
+    "right_ankle": {
+      "index": 28,
+      "x": -0.5074941742973155,
+      "y": 0.03994156239234348,
+      "z": -0.1411528315005663
+    },
+    "left_heel": {
+      "index": 29,
+      "x": -0.14731585399606362,
+      "y": 0.13581184178953573,
+      "z": -0.3586386396893024
+    },
+    "right_heel": {
+      "index": 30,
+      "x": -0.4331818766525819,
+      "y": 0.08480863071223421,
+      "z": -0.3200036478771899
+    },
+    "left_foot_index": {
+      "index": 31,
+      "x": 0.17772187009343623,
+      "y": -0.008875124235418315,
+      "z": -0.3727511606736673
+    },
+    "right_foot_index": {
+      "index": 32,
+      "x": -0.6464491886086714,
+      "y": -0.026451287386678925,
+      "z": -0.16852802739375353
+    }
+  },
+  "diagnostics": {
+    "left_hip": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "mean_reprojection_error_px": 61.88788408138574,
+      "max_reprojection_error_px": 131.42597180074952
+    },
+    "right_hip": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "mean_reprojection_error_px": 62.96337922651617,
+      "max_reprojection_error_px": 84.30277382548054
+    },
+    "left_knee": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "mean_reprojection_error_px": 83.90208382757858,
+      "max_reprojection_error_px": 151.5917923819218
+    },
+    "right_knee": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "mean_reprojection_error_px": 85.29719264313017,
+      "max_reprojection_error_px": 130.34257530929196
+    },
+    "left_ankle": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "mean_reprojection_error_px": 94.9402691354626,
+      "max_reprojection_error_px": 201.43827991074613
+    },
+    "right_ankle": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "mean_reprojection_error_px": 103.37267426982442,
+      "max_reprojection_error_px": 173.1672293909191
+    },
+    "left_heel": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "mean_reprojection_error_px": 106.63814269239046,
+      "max_reprojection_error_px": 182.76545425993652
+    },
+    "right_heel": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "mean_reprojection_error_px": 75.52151673367491,
+      "max_reprojection_error_px": 142.59316101187065
+    },
+    "left_foot_index": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "mean_reprojection_error_px": 101.41401524894293,
+      "max_reprojection_error_px": 203.35796706747558
+    },
+    "right_foot_index": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "mean_reprojection_error_px": 165.48018981915712,
+      "max_reprojection_error_px": 271.88212410837025
+    }
+  }
+}

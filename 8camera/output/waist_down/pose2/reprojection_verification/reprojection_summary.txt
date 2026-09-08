@@ -1,0 +1,111 @@
+Reprojection Error Summary: pose2
+============================================================
+
+Per-Camera Statistics:
+------------------------------------------------------------
+
+cam03:
+  Mean error: 269.13 px
+  Max error:  609.53 px
+  Min error:  113.63 px
+  Std dev:    180.87 px
+
+cam04:
+  Mean error: 196.92 px
+  Max error:  374.13 px
+  Min error:  13.98 px
+  Std dev:    99.41 px
+
+cam06:
+  Mean error: 298.03 px
+  Max error:  393.82 px
+  Min error:  100.40 px
+  Std dev:    93.10 px
+
+cam07:
+  Mean error: 433.60 px
+  Max error:  975.18 px
+  Min error:  217.72 px
+  Std dev:    208.10 px
+
+cam08:
+  Mean error: 271.12 px
+  Max error:  290.71 px
+  Min error:  251.54 px
+  Std dev:    19.59 px
+
+
+Per-Landmark Statistics:
+------------------------------------------------------------
+
+right_foot_index:
+  Mean: 674.66 px
+  Max:  975.18 px
+  Views: 2
+  Diagnostic mean: 221.6666071981108
+
+right_knee:
+  Mean: 429.16 px
+  Max:  545.10 px
+  Views: 2
+  Diagnostic mean: 114.97565858090029
+
+left_heel:
+  Mean: 408.97 px
+  Max:  609.53 px
+  Views: 4
+  Diagnostic mean: 148.51710015714397
+
+right_ankle:
+  Mean: 369.39 px
+  Max:  466.38 px
+  Views: 3
+  Diagnostic mean: 125.91789971605382
+
+left_ankle:
+  Mean: 303.01 px
+  Max:  450.16 px
+  Views: 3
+  Diagnostic mean: 136.9355515440636
+
+right_heel:
+  Mean: 297.10 px
+  Max:  363.74 px
+  Views: 4
+  Diagnostic mean: 109.57542337054943
+
+left_foot_index:
+  Mean: 236.81 px
+  Max:  339.11 px
+  Views: 2
+  Diagnostic mean: 123.39278090601742
+
+left_hip:
+  Mean: 216.67 px
+  Max:  325.58 px
+  Views: 5
+  Diagnostic mean: 83.8739610695441
+
+left_knee:
+  Mean: 175.21 px
+  Max:  283.19 px
+  Views: 3
+  Diagnostic mean: 60.93579568656658
+
+right_hip:
+  Mean: 169.91 px
+  Max:  290.71 px
+  Views: 5
+  Diagnostic mean: 91.54180073309871
+
+
+Overall Summary:
+------------------------------------------------------------
+Total measurements: 33
+Mean error: 302.46 px
+Max error:  975.18 px
+Min error:  13.98 px
+Std dev:    177.46 px
+
+Quality Assessment:
+  POOR - Mean error > 100px
