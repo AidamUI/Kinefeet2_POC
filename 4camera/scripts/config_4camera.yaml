@@ -1,0 +1,41 @@
+# =============================================================================
+# config_4camera.yaml - Configuration for 4-camera setup
+# =============================================================================
+# This configuration is optimized for a 4-camera setup at 90-degree intervals
+# (0°, 90°, 180°, 270°) instead of the standard 8-camera setup.
+
+camera:
+  # Only used if you did NOT run 01_calibrate_camera.py. Most phone main
+  # cameras (not the ultra-wide or telephoto lens) are roughly 60-75 deg
+  # horizontal field of view.
+  assumed_fov_deg: 65
+
+rig:
+  # ---- FULL BODY capture with 4 cameras ----
+  # angles_deg: the shooting angle of each photo, in the order your photo
+  # filenames sort alphabetically (01.jpg, 02.jpg, 03.jpg, 04.jpg = 0, 90, 180, 270 deg).
+  full_body:
+    angles_deg: [0, 90, 180, 270]
+    radius_m: 2.5          # distance from camera to the subject's center line
+    camera_height_m: 1.1   # height of the camera lens off the floor
+    target_height_m: 0.9   # height on the subject the camera was aimed at (~navel)
+
+  # ---- WAIST-DOWN capture with 4 cameras ----
+  # Typically shot closer and lower since you're only framing hips-to-feet.
+  waist_down:
+    angles_deg: [0, 90, 180, 270]
+    radius_m: 1.5
+    camera_height_m: 0.55
+    target_height_m: 0.45  # roughly mid-thigh
+
+triangulation:
+  # A landmark is only used from a photo if MediaPipe's visibility score
+  # for it is at least this. Visibility ~0-1, where MediaPipe is unsure
+  # about occluded/out-of-frame joints.
+  min_visibility: 0.1
+  # A landmark needs at least this many usable photos to be triangulated
+  # at all. With 4 cameras, we need at least 2 views (mathematical minimum).
+  # 3 is more robust but may exclude some joints.
+  min_views: 2
+
+# Made with Bob
