@@ -5,9 +5,10 @@
 # (0°, 90°, 180°, 270°) instead of the standard 8-camera setup.
 
 camera:
-  # Only used if you did NOT run 01_calibrate_camera.py. Most phone main
-  # cameras (not the ultra-wide or telephoto lens) are roughly 60-75 deg
-  # horizontal field of view.
+  # Fallback only, used when camera_calibration/ has not produced a
+  # cameras.json yet. A real calibration overrides this entirely.
+  # Most phone main cameras (not the ultra-wide or telephoto lens) are
+  # roughly 60-75 deg horizontal field of view.
   assumed_fov_deg: 65
 
 rig:

@@ -8,6 +8,7 @@ This creates annotated images showing:
 - Error values in pixels
 """
 
+import os
 import numpy as np
 import cv2
 import json
@@ -49,6 +50,45 @@ def load_3d_joints(joints_file):
         joints_3d[name] = np.array([joint_data['x'], joint_data['y'], joint_data['z']])
     
     return joints_3d, data.get('diagnostics', {})
+
+
+def effective_projection_matrix(cam_data, photo_width, photo_height, max_aspect_drift=0.03):
+    """This camera's P, rescaled to the resolution the photo actually is.
+
+    cameras.json's K is tied to one exact frame geometry - fx/fy scale with
+    resolution, cx/cy are pixel coordinates in that specific frame. Comparing
+    its raw P against 2D keypoints measured in a different photo resolution
+    (a different export tool, a codec rounding dimensions to a multiple of 2 or
+    16) makes this verification measure that resolution mismatch instead of the
+    reconstruction's real accuracy - every reported error inflated by roughly
+    the resolution ratio, which reads as "camera calibration isn't working"
+    when the 3D reconstruction itself (see scripts/04_triangulate_3d.py, which
+    already corrects for exactly this) may be fine.
+
+    Mirrors 04_triangulate_3d.py's effective_projection_matrices - duplicated
+    rather than imported because module names starting with a digit aren't
+    importable with a plain ``import`` statement.
+    """
+    calib_w, calib_h = cam_data.get("image_width"), cam_data.get("image_height")
+    if not (calib_w and calib_h) or (photo_width, photo_height) == (calib_w, calib_h):
+        return np.array(cam_data["P"])
+
+    calib_aspect = calib_w / calib_h
+    photo_aspect = photo_width / photo_height
+    if abs(photo_aspect - calib_aspect) > max_aspect_drift * calib_aspect:
+        print(f"    [!] photo is {photo_width}x{photo_height}, calibrated at "
+              f"{calib_w}x{calib_h} - aspect ratio differs too much to be a "
+              f"resize (likely cropped); using calibration-resolution P "
+              f"uncorrected, so these numbers will be biased")
+        return np.array(cam_data["P"])
+
+    sx, sy = photo_width / calib_w, photo_height / calib_h
+    K = np.array(cam_data["K"], dtype=np.float64).copy()
+    K[0, :] *= sx
+    K[1, :] *= sy
+    R = np.array(cam_data["R"], dtype=np.float64)
+    t = np.array(cam_data["t"], dtype=np.float64).reshape(3, 1)
+    return K @ np.hstack([R, t])
 
 
 def project_3d_to_2d(point_3d, P):
@@ -124,7 +164,7 @@ def draw_reprojection_comparison(image, keypoints_2d, joints_3d, P,
     return img_annotated, errors
 
 
-def create_error_summary_overlay(image, errors, cam_name):
+def create_error_summary_overlay(image, errors, cam_name, person_scale=None):
     """Create summary statistics overlay on image."""
     img_with_stats = image.copy()
     
@@ -137,9 +177,19 @@ def create_error_summary_overlay(image, errors, cam_name):
     max_error = np.max(error_values)
     min_error = np.min(error_values)
     
-    # Create semi-transparent overlay
+    # Calculate normalized error using person scale if available
+    img_h, img_w = image.shape[:2]
+    if person_scale and person_scale > 0:
+        normalization_value = person_scale
+        norm_label = "shoulder width"
+    else:
+        normalization_value = np.sqrt(img_w**2 + img_h**2)
+        norm_label = "image diagonal"
+    mean_error_pct = (mean_error / normalization_value) * 100
+    
+    # Create semi-transparent overlay (taller to fit normalized error)
     overlay = img_with_stats.copy()
-    cv2.rectangle(overlay, (10, 10), (400, 180), (0, 0, 0), -1)
+    cv2.rectangle(overlay, (10, 10), (450, 230), (0, 0, 0), -1)
     cv2.addWeighted(overlay, 0.7, img_with_stats, 0.3, 0, img_with_stats)
     
     # Add text
@@ -148,12 +198,20 @@ def create_error_summary_overlay(image, errors, cam_name):
                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
     
     y_offset += 30
+    if person_scale:
+        cv2.putText(img_with_stats, f"Image: {img_w}x{img_h}, Person: {person_scale:.0f}px", (20, y_offset),
+                   cv2.FONT_HERSHEY_SIMPLEX, 0.45, (200, 200, 200), 1)
+    else:
+        cv2.putText(img_with_stats, f"Image: {img_w}x{img_h}", (20, y_offset),
+                   cv2.FONT_HERSHEY_SIMPLEX, 0.45, (200, 200, 200), 1)
+    
+    y_offset += 30
     cv2.putText(img_with_stats, "Reprojection Error:", (20, y_offset),
                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
     
     y_offset += 25
-    cv2.putText(img_with_stats, f"Mean: {mean_error:.2f} px", (20, y_offset),
-               cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 1)
+    cv2.putText(img_with_stats, f"Mean: {mean_error:.2f} px ({mean_error_pct:.2f}% of {norm_label})", (20, y_offset),
+               cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 255, 255), 1)
     
     y_offset += 25
     cv2.putText(img_with_stats, f"Max:  {max_error:.2f} px", (20, y_offset),
@@ -163,14 +221,28 @@ def create_error_summary_overlay(image, errors, cam_name):
     cv2.putText(img_with_stats, f"Min:  {min_error:.2f} px", (20, y_offset),
                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 1)
     
+    # Add quality assessment (adjusted thresholds for shoulder-width normalization)
+    y_offset += 30
+    if mean_error_pct < 10.0:
+        quality = "Excellent"
+        color = (0, 255, 0)
+    elif mean_error_pct < 25.0:
+        quality = "Good"
+        color = (0, 255, 255)
+    else:
+        quality = "Check rig"
+        color = (0, 0, 255)
+    cv2.putText(img_with_stats, f"Quality: {quality}", (20, y_offset),
+               cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+    
     # Add legend
-    y_offset += 35
+    y_offset += 30
     cv2.circle(img_with_stats, (30, y_offset), 6, (0, 255, 0), 2)
     cv2.putText(img_with_stats, "= Detected 2D", (45, y_offset + 5),
                cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
     
     y_offset += 20
-    cv2.drawMarker(img_with_stats, (30, y_offset), (0, 0, 255), 
+    cv2.drawMarker(img_with_stats, (30, y_offset), (0, 0, 255),
                   cv2.MARKER_CROSS, 10, 2)
     cv2.putText(img_with_stats, "= Projected 3D", (45, y_offset + 5),
                cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
@@ -195,8 +267,19 @@ def process_pose(data_dir, pose_name, version, output_dir):
         print(f"  Make sure you've run triangulation first (script 04)")
         return
     
+    with open(joints_file, 'r') as f:
+        joints_data = json.load(f)
+    
     joints_3d, diagnostics = load_3d_joints(joints_file)
     print(f"  Loaded {len(joints_3d)} 3D joints")
+    
+    # Get person scale from joints_3d.json
+    person_scale = joints_data.get('person_scale_px', None)
+    if person_scale:
+        print(f"  Person scale: {person_scale:.0f} px")
+    
+    # Get image dimensions from first available image
+    img_width, img_height = None, None
     
     # Load cameras from OUTPUT directory
     cameras_file = output_dir / version / "cameras.json"
@@ -232,32 +315,40 @@ def process_pose(data_dir, pose_name, version, output_dir):
             continue
         
         cam_data = cameras[cam_key]
-        P = np.array(cam_data['P'])  # Projection matrix
-        
+
         # Load 2D keypoints
         keypoints_2d = load_2d_keypoints(kp_file)
-        
+
         # Load original image from DATA directory
         image_patterns = [
             data_pose_dir / f"{cam_name}.png",
             data_pose_dir / f"{cam_name}.jpg",
             data_pose_dir / f"{cam_name}.jpeg",
         ]
-        
+
         image_file = None
         for pattern in image_patterns:
             if pattern.exists():
                 image_file = pattern
                 break
-        
+
         if image_file is None:
             print(f"    [SKIP] No image found for {cam_name}")
             continue
-        
+
         image = cv2.imread(str(image_file))
         if image is None:
             print(f"    [ERROR] Could not load image {image_file}")
             continue
+
+        # Store image dimensions from first image
+        photo_height, photo_width = image.shape[:2]
+        if img_width is None:
+            img_height, img_width = photo_height, photo_width
+
+        # Rescaled to THIS photo's actual resolution, not the one cameras.json
+        # was calibrated at - see effective_projection_matrix.
+        P = effective_projection_matrix(cam_data, photo_width, photo_height)
         
         # Create reprojection visualization
         img_annotated, errors = draw_reprojection_comparison(
@@ -266,7 +357,7 @@ def process_pose(data_dir, pose_name, version, output_dir):
         )
         
         # Add statistics overlay
-        img_with_stats = create_error_summary_overlay(img_annotated, errors, cam_name)
+        img_with_stats = create_error_summary_overlay(img_annotated, errors, cam_name, person_scale)
         
         # Save
         output_file = output_pose_dir / f"cam{cam_name}_reprojection.jpg"
@@ -282,18 +373,35 @@ def process_pose(data_dir, pose_name, version, output_dir):
             print(f"    Mean error: {mean_err:.2f}px, Max: {max_err:.2f}px")
     
     # Create summary report
-    create_summary_report(all_errors, diagnostics, output_pose_dir, pose_name)
+    create_summary_report(all_errors, diagnostics, output_pose_dir, pose_name, img_width, img_height, person_scale)
     
     print(f"  [SUCCESS] Saved to {output_pose_dir}")
 
 
-def create_summary_report(all_errors, diagnostics, output_dir, pose_name):
+def create_summary_report(all_errors, diagnostics, output_dir, pose_name, img_width, img_height, person_scale=None):
     """Create a text summary report of reprojection errors."""
     report_file = output_dir / "reprojection_summary.txt"
+    
+    # Use person scale for normalization if available, otherwise use image diagonal
+    if person_scale and person_scale > 0:
+        normalization_value = person_scale
+        norm_label = "shoulder width"
+    else:
+        normalization_value = np.sqrt(img_width**2 + img_height**2) if img_width and img_height else 1.0
+        norm_label = "image diagonal"
     
     with open(report_file, 'w') as f:
         f.write(f"Reprojection Error Summary: {pose_name}\n")
         f.write("=" * 60 + "\n\n")
+        
+        if img_width and img_height:
+            f.write(f"Image Resolution: {img_width}x{img_height}\n")
+            if person_scale:
+                f.write(f"Person Scale: {person_scale:.1f} px (shoulder width)\n")
+                f.write(f"Normalization: Using shoulder width (pose-invariant)\n\n")
+            else:
+                f.write(f"Image Diagonal: {normalization_value:.1f} px\n")
+                f.write(f"Normalization: Using image diagonal (person scale unavailable)\n\n")
         
         # Per-camera summary
         f.write("Per-Camera Statistics:\n")
@@ -305,8 +413,11 @@ def create_summary_report(all_errors, diagnostics, output_dir, pose_name):
                 continue
             
             error_values = list(errors.values())
+            mean_err = np.mean(error_values)
+            mean_err_pct = (mean_err / normalization_value) * 100
+            
             f.write(f"\n{cam_name}:\n")
-            f.write(f"  Mean error: {np.mean(error_values):.2f} px\n")
+            f.write(f"  Mean error: {mean_err:.2f} px ({mean_err_pct:.2f}% of {norm_label})\n")
             f.write(f"  Max error:  {np.max(error_values):.2f} px\n")
             f.write(f"  Min error:  {np.min(error_values):.2f} px\n")
             f.write(f"  Std dev:    {np.std(error_values):.2f} px\n")
@@ -349,25 +460,24 @@ def create_summary_report(all_errors, diagnostics, output_dir, pose_name):
             all_error_values.extend(cam_errors.values())
         
         if all_error_values:
+            mean_overall = np.mean(all_error_values)
+            mean_overall_pct = (mean_overall / normalization_value) * 100
+            
             f.write(f"Total measurements: {len(all_error_values)}\n")
-            f.write(f"Mean error: {np.mean(all_error_values):.2f} px\n")
+            f.write(f"Mean error: {mean_overall:.2f} px ({mean_overall_pct:.2f}% of {norm_label})\n")
             f.write(f"Max error:  {np.max(all_error_values):.2f} px\n")
             f.write(f"Min error:  {np.min(all_error_values):.2f} px\n")
             f.write(f"Std dev:    {np.std(all_error_values):.2f} px\n")
             
-            # Quality assessment
-            f.write("\nQuality Assessment:\n")
-            mean_err = np.mean(all_error_values)
-            if mean_err < 20:
-                f.write("  EXCELLENT - Mean error < 20px\n")
-            elif mean_err < 50:
-                f.write("  GOOD - Mean error < 50px\n")
-            elif mean_err < 100:
-                f.write("  ACCEPTABLE - Mean error < 100px\n")
-            elif mean_err < 500:
-                f.write("  POOR - Mean error > 100px\n")
+            # Quality assessment (adjusted thresholds for shoulder-width normalization)
+            f.write(f"\nQuality Assessment:\n")
+            if mean_overall_pct < 10.0:
+                f.write(f"  EXCELLENT - Error is {mean_overall_pct:.2f}% of {norm_label}\n")
+            elif mean_overall_pct < 25.0:
+                f.write(f"  GOOD - Error is {mean_overall_pct:.2f}% of {norm_label}\n")
             else:
-                f.write("  UNUSABLE - Mean error > 500px\n")
+                f.write(f"  NEEDS IMPROVEMENT - Error is {mean_overall_pct:.2f}% of {norm_label}\n")
+                f.write(f"  Consider checking camera rig measurements or subject movement\n")
 
 
 def process_version(version, data_dir, output_dir, pose_arg):
@@ -399,19 +509,30 @@ def process_version(version, data_dir, output_dir, pose_arg):
 
 
 def main():
+    # Relative to THIS FILE, not the process's current working directory. Every
+    # other numbered script resolves its paths the same way (via __file__);
+    # this one used to default to the plain strings '../data' / '../output',
+    # which resolve against whatever the CWD happened to be at launch - the
+    # project root if run directly, but something else entirely when launched
+    # through 4camera's or 8camera's pipeline wrappers, which is exactly when
+    # getting it wrong matters, since those wrappers point data/ and output/ at
+    # a *borrowed* per-rig copy that only exists at a fixed absolute path.
+    default_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data")
+    default_output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "output")
+
     parser = argparse.ArgumentParser(
         description="Verify 3D reconstruction by back-projecting to 2D images"
     )
     parser.add_argument(
         '--data_dir',
         type=str,
-        default='../data',
+        default=default_data_dir,
         help='Data directory containing pose folders'
     )
     parser.add_argument(
         '--output_dir',
         type=str,
-        default='../output',
+        default=default_output_dir,
         help='Output directory for verification images'
     )
     parser.add_argument(
@@ -426,9 +547,9 @@ def main():
         choices=['full_body', 'waist_down'],
         help='Version to process. If not specified, processes BOTH full_body and waist_down.'
     )
-    
+
     args = parser.parse_args()
-    
+
     data_dir = Path(args.data_dir)
     output_dir = Path(args.output_dir)
     

@@ -92,10 +92,9 @@ def build_intrinsics(image_width, image_height, sensor_fov_deg=60.0):
     """
     Build a pinhole camera intrinsic matrix K.
 
-    If you ran 01_calibrate_camera.py, you already have a precise K from a
-    checkerboard and should load that JSON instead of calling this
-    function (04_triangulate_3d.py does this automatically - see
-    config.yaml -> calibration.use_checkerboard).
+    This is a fallback. camera_calibration/ measures K properly from the
+    square-grid board and writes it into cameras.json, which is what
+    04_triangulate_3d.py reads.
 
     Otherwise, this builds an *approximate* K from a guessed horizontal
     field of view. Most modern phone main cameras are roughly 60-75

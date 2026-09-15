@@ -1,28 +1,28 @@
 # 3D body skeleton exported from MediaPipe multi-view triangulation
 # vertices = joints, lines = bones
-v -0.25545 -0.05868 3.09165  # nose
-v 0.09838 0.30008 2.48759  # left_shoulder
-v -0.02049 -0.51640 2.48365  # right_shoulder
-v 0.45117 0.55911 1.45156  # left_elbow
-v -0.26068 -0.80943 1.53464  # right_elbow
-v 0.02155 0.63976 0.53076  # left_wrist
-v -0.55080 -0.86281 0.67011  # right_wrist
-v -0.01711 0.65305 0.26895  # left_pinky
-v -0.53531 -0.88436 0.43656  # right_pinky
-v -0.10952 0.61920 0.26953  # left_index
-v -0.63980 -0.82121 0.44140  # right_index
-v -0.12050 0.62249 0.35711  # left_thumb
-v -0.65475 -0.78467 0.51360  # right_thumb
-v 0.02135 0.17804 0.88826  # left_hip
-v -0.06232 -0.48359 0.91430  # right_hip
-v -0.00247 0.22150 -0.45273  # left_knee
-v -0.14797 -0.45227 -0.39144  # right_knee
-v -0.06587 0.12181 -1.79578  # left_ankle
-v -0.13636 -0.41608 -1.71640  # right_ankle
-v -0.12331 0.07918 -1.97981  # left_heel
-v -0.13314 -0.37881 -1.95911  # right_heel
-v 0.01577 0.20272 -2.06121  # left_foot_index
-v -0.10647 -0.37432 -2.08262  # right_foot_index
+v 0.32062 -0.15145 1.34973  # nose
+v 0.46669 -0.03335 1.16716  # left_shoulder
+v 0.16558 -0.03040 1.17458  # right_shoulder
+v 0.49167 -0.01407 0.90034  # left_elbow
+v 0.13659 -0.03593 0.92019  # right_elbow
+v 0.50753 -0.06322 0.69049  # left_wrist
+v 0.12218 -0.12475 0.71156  # right_wrist
+v 0.51428 -0.05687 0.62768  # left_pinky
+v 0.11306 -0.13278 0.65828  # right_pinky
+v 0.50678 -0.08424 0.62714  # left_index
+v 0.13349 -0.15512 0.65962  # right_index
+v 0.49742 -0.08753 0.64561  # left_thumb
+v 0.14302 -0.15198 0.67516  # right_thumb
+v 0.38937 -0.04798 0.72471  # left_hip
+v 0.21026 -0.03906 0.72645  # right_hip
+v 0.42737 -0.04107 0.40874  # left_knee
+v 0.17524 -0.03267 0.40900  # right_knee
+v 0.46986 -0.01078 0.07519  # left_ankle
+v 0.14422 -0.01974 0.07429  # right_ankle
+v 0.46065 0.02022 0.01049  # left_heel
+v 0.14817 0.01174 0.01752  # right_heel
+v 0.53255 -0.13531 0.01924  # left_foot_index
+v 0.12564 -0.16026 0.01257  # right_foot_index
 l 2 3
 l 2 4
 l 4 6
