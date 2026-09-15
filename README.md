@@ -1,313 +1,258 @@
 # Kinefeet 2.0 - Multi-View 3D Foot Reconstruction
 
-**Proof of Concept: Next-generation diabetic foot assessment using computer vision and 3D reconstruction**
+Proof of concept: diabetic foot assessment using computer vision and 3D
+reconstruction.
 
 ## Project Background
 
-Kinefeet is a diabetic foot assessment tool designed to help healthcare providers monitor foot deformities and complications in diabetic patients. Traditional Kinefeet uses manual measurements and 2D photography, which can be time-consuming and subjective.
+Kinefeet is a diabetic foot assessment tool that helps healthcare providers
+monitor foot deformities and complications in diabetic patients. Traditional
+Kinefeet uses manual measurements and 2D photography, which can be
+time-consuming and subjective.
 
-**This is a Proof of Concept (POC)** for Kinefeet 2.0, which aims to modernize diabetic foot assessment using multi-view 3D reconstruction technology. By capturing photos from multiple angles and using computer vision, we can create accurate 3D models of patients' feet and lower body, enabling:
+This proof of concept modernizes diabetic foot assessment using multi-view
+3D reconstruction. By capturing photos from multiple angles and applying
+computer vision, it builds accurate 3D models of a patient's feet and lower
+body, enabling:
 
-- **Objective measurements** - Precise 3D distances, angles, and volumes
-- **Progress tracking** - Compare 3D models over time to detect changes
-- **Remote assessment** - 3D models can be analyzed without patient present
-- **Clinical documentation** - Permanent 3D records for medical files
+- Objective measurements: precise 3D distances, angles and volumes
+- Progress tracking: comparing 3D models over time to detect changes
+- Remote assessment: 3D models can be reviewed without the patient present
+- Clinical documentation: permanent 3D records for medical files
 
 ## Overview
 
-This system converts ordinary photos taken from multiple angles into accurate 3D skeletal reconstructions and realistic body meshes. The approach uses geometric triangulation - the same principle your eyes use to perceive depth - rather than AI-based depth estimation.
+This system converts ordinary photos taken from multiple angles into 3D
+skeletal reconstructions and body meshes. It uses geometric triangulation,
+the same principle stereo vision uses to perceive depth, rather than
+AI-based depth estimation.
 
-**Clinical Applications:**
+Clinical applications:
 - Diabetic foot deformity assessment (arch collapse, toe deformities)
 - Lower limb alignment analysis (pronation, supination)
 - Wound location and size documentation
 - Gait analysis preparation
-- Pre/post-surgical comparison
+- Pre- and post-surgical comparison
 
-**Key Features:**
+Key features:
 - Multi-view 2D pose detection using MediaPipe
 - Geometric 3D triangulation from calibrated cameras
 - Full body and waist-down capture modes
-- Realistic mesh generation from skeleton data
+- Body mesh generation from skeleton data
 - Interactive 3D visualization
-- No specialized hardware required (smartphone camera works)
+- No specialized hardware required; a smartphone camera works
 
-**What You Get:**
-- 3D skeleton models (33 joints, OBJ/PLY format)
-- Realistic body meshes (5,000+ vertices)
+What you get, per pose:
+- 3D skeleton models (33 joints, OBJ and PLY format)
+- Body meshes (5,000+ vertices)
 - Interactive HTML visualizations
 - Annotated 2D detection images
-- Detailed accuracy metrics
+- Accuracy metrics (reprojection error per joint and per camera)
 
-## Use Cases
-
-### Full Body Mode
-Captures entire body from head to toe. Useful for:
-- Overall posture and alignment assessment
-- Gait preparation (understanding full body mechanics)
-- Comprehensive diabetic complication screening
-- Research and documentation
-
-### Waist-Down Mode
-Focuses on lower body and feet. Ideal for:
-- **Diabetic foot assessment** (primary use case)
-- Detailed foot deformity analysis
-- Lower limb alignment studies
-- Faster processing (fewer landmarks to track)
-
-**Protocol:** Capture 3 different poses for each mode to assess:
-- Pose 1: Natural standing position
-- Pose 2: Weight-bearing variation
-- Pose 3: Alternative stance or specific clinical position
-
-## Quick Start
-
-### 1. Installation
-
-```bash
-# Clone or download this repository
-cd mp3d
-
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-
-# Install dependencies
-python setup.py
-```
-
-### 2. Capture Photos
-
-Take 8 photos around your subject at evenly-spaced angles (every 45°):
-- Use the same camera/phone for all shots
-- Keep camera at consistent height and distance
-- Subject must hold pose completely still
-- Good, even lighting (avoid harsh shadows)
-
-Place photos in:
-```
-data/full_body/pose1/01.jpg through 08.jpg
-data/full_body/pose2/01.jpg through 08.jpg
-data/full_body/pose3/01.jpg through 08.jpg
-```
-
-### 3. Configure Measurements
-
-Edit `config.yaml` with your actual measurements:
-```yaml
-rig:
-  full_body:
-    radius_m: 2.5          # Distance from subject to camera
-    camera_height_m: 1.1   # Height of camera from ground
-    target_height_m: 0.9   # Height on body you aimed at
-```
-
-### 4. Run Pipeline
-
-```bash
-cd scripts
-python run_pipeline.py
-```
-
-Results appear in `output/full_body/pose1/` (and pose2, pose3):
-- `model.obj` - 3D skeleton
-- `interactive.html` - Rotatable 3D view
-- `*_mediapipe_mesh.obj` - Realistic body mesh
-- `preview.png` - Static render
-
-## How It Works
-
-### The Kinefeet 2.0 Pipeline
-
-This system uses a 4-step process to convert photos into 3D models:
-
-1. **Photo Capture** - Take 8 photos around the subject at 45° intervals
-   - Subject holds completely still in standing position
-   - Same camera, same height, same distance for all shots
-   - Captures full body OR waist-down (for focused foot assessment)
-
-2. **2D Pose Detection** - MediaPipe analyzes each photo
-   - Detects 33 body landmarks (including 6 foot landmarks per foot)
-   - Provides pixel coordinates for each joint in each image
-   - Works with ordinary smartphone photos
-
-3. **3D Triangulation** - Geometric reconstruction
-   - Uses camera positions and 2D detections from all 8 views
-   - Calculates exact 3D coordinates for each joint
-   - Same principle as stereo vision (how your eyes see depth)
-
-4. **Mesh Generation** - Creates realistic 3D body surface
-   - Converts skeleton to smooth, anatomically correct mesh
-   - ~5,000 vertices for detailed surface representation
-   - Suitable for clinical measurements and visualization
-
-### Why Multi-View?
-
-Single photos can't capture depth. By using 8 cameras positioned around the subject, we can:
-- Triangulate accurate 3D positions (like how your two eyes perceive depth)
-- Capture the complete foot/body from all angles
-- Achieve millimeter-level accuracy for clinical measurements
-- Work with ordinary cameras (no depth sensors needed)
-
-### Accuracy Factors
-
-Your results depend on:
-1. **Subject stillness** - Any movement between shots causes errors (biggest factor)
-2. **Measurement accuracy** - Precise rig geometry improves results
-3. **Camera calibration** - Required; see camera_calibration/
-4. **Lighting quality** - Even lighting helps MediaPipe detection
-
-## Project Structure
+## Repository structure
 
 ```
-mp3d/
-├── README.md              # This file
-├── GUIDE.md               # Detailed usage guide
-├── DEPENDENCIES.md        # Technical dependencies reference
-├── config.yaml            # Your rig measurements
-├── requirements.txt       # Python dependencies
-├── setup.py               # Installation script
-├── data/                  # Your input photos
-│   ├── calibration_images/
-│   ├── full_body/
-│   │   ├── pose1/
-│   │   ├── pose2/
-│   │   └── pose3/
-│   └── waist_down/
-│       ├── pose1/
-│       ├── pose2/
-│       └── pose3/
-├── scripts/
-│   ├── 02_extract_2d_keypoints.py
-│   ├── 03_setup_camera_rig.py
-│   ├── 04_triangulate_3d.py
-│   ├── 05_export_and_visualize.py
-│   ├── 07_generate_mediapipe_mesh.py
-│   ├── run_pipeline.py
-│   └── utils.py
-├── output/                # Generated results
-└── smpl_models/           # Optional: for advanced mesh generation
+Kinefeet2_POC/
+├── camera_calibration/   # Calibrates cameras: required for accurate results
+├── 4camera/               # Ready-made setup for 4 synchronized cameras
+├── 8camera/               # Ready-made setup for 8 synchronized cameras
+├── scripts/               # Generic pipeline used by all of the above
+├── config.yaml            # Rig measurements for the generic root pipeline
+├── requirements.txt        # Python dependencies
+├── setup.py                # Installation script
+├── data/                   # Input photos for the generic root pipeline
+├── output/                 # Generated results for the generic root pipeline
+├── models/                 # MediaPipe pose model
+└── smpl_models/            # Optional: for SMPL-X mesh generation
 ```
 
-## Output Files
+Most users should start with `4camera/` or `8camera/`, which wrap the
+scripts in `scripts/` with a ready-made configuration for that number of
+cameras. The root `data/`, `output/` and `config.yaml` belong to the generic
+pipeline (`scripts/run_pipeline.py`), which supports any number of cameras
+at any angles through configuration, for setups that do not match 4 or 8
+cameras.
 
-For each pose, you'll get:
+## Camera calibration
 
-**Skeleton Files:**
-- `model.obj` - 3D skeleton (open in Blender, MeshLab, Windows 3D Viewer)
-- `model.ply` - Point cloud format
-- `joints_3d.json` - Raw 3D coordinates with accuracy metrics
-- `preview.png` - Static 3D render
-- `interactive.html` - Browser-based 3D viewer
+Camera calibration is required, not optional. It is what turns pixel
+coordinates into metric 3D positions. Without it, the pipeline falls back to
+an assumed camera ring built from typed-in measurements, which is far less
+accurate than a real calibration.
 
-**Mesh Files:**
-- `*_mediapipe_mesh.obj` - Realistic body mesh (~5,000 vertices)
-- `*_mediapipe_mesh.ply` - Mesh in PLY format
-- `*_mediapipe_mesh_interactive.html` - Interactive mesh viewer
-- `*_mediapipe_mesh_preview.png` - Mesh preview image
+Calibration uses the Captury colour square-grid board, not a checkerboard.
+See [`camera_calibration/README.md`](camera_calibration/README.md) for the
+full explanation and instructions:
 
-**Diagnostic Files:**
-- `annotated/*.jpg` - Photos with detected skeleton overlay
-- `keypoints_2d/*.json` - Raw 2D detections per photo
-- `cameras.json` - Camera projection matrices
-
-## Viewing Results
-
-### Skeleton Models
-- **Windows**: Right-click `model.obj` → Open with → 3D Viewer
-- **Blender**: File → Import → Wavefront (.obj)
-- **Online**: Upload to https://3dviewer.net/
-
-### Body Meshes
-- **Windows**: Right-click `*_mediapipe_mesh.obj` → Open with → 3D Viewer
-- **Blender**: File → Import → Wavefront (.obj)
-- **Browser**: Open `*_mediapipe_mesh_interactive.html`
-
-## Checking Quality
-
-After running the pipeline, check:
-
-1. **Visual Inspection** - Does `preview.png` look like the pose?
-2. **Reprojection Error** - Printed in console during triangulation
-   - < 15px: Excellent
-   - 15-40px: Good, usable
-   - > 40px: Check troubleshooting section
-3. **Annotated Images** - Check `output/*/pose*/annotated/` for detection quality
-
-## Common Issues
-
-**"NO POSE DETECTED"**
-- Subject too small/far in frame
-- Poor lighting or low contrast
-- Retake photo with better framing
-
-**High reprojection errors (>40px)**
-- Subject moved between shots
-- Rig measurements in config.yaml don't match reality
-- Camera angles not evenly spaced
-- Run camera calibration (see camera_calibration/README.md)
-
-**Distorted 3D model**
-- Photo filenames don't sort in same order as angles
-- Check that 01.jpg = 0°, 02.jpg = 45°, etc.
-
-**Missing joints**
-- Joint not visible in enough photos
-- Lower `min_visibility` in config.yaml
-- Retake with better framing
-
-## Advanced Features
-
-### Camera Calibration
-Required, not optional - it is what makes the 3D output metric. Uses the Captury
-colour square-grid board, not a checkerboard:
 ```bash
 cd camera_calibration
 python calibrate_intrinsics.py     # focal length, principal point, distortion
 python calibrate_extrinsics.py     # where the cameras are, in one world frame
-python export_cameras.py           # -> <rig>/output/<version>/cameras.json
+python export_cameras.py           # writes cameras.json for the pipeline
 ```
-See [camera_calibration/README.md](camera_calibration/README.md).
 
-### Mesh Generation
-Two approaches available:
-1. **MediaPipe-native** (default) - Works immediately, good quality
-2. **SMPL-X** (advanced) - Requires model download, highest quality
+## Quick start (4-camera rig)
 
-See GUIDE.md for mesh generation details.
+1. Install dependencies:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate   # Windows: venv\Scripts\activate
+   python setup.py
+   ```
 
-### Multiple Subjects
-To process different subjects or sessions:
-1. Create new folders in `data/`
-2. Update `config.yaml` with new rig measurements
-3. Run pipeline for each session
+2. Calibrate your cameras once, following
+   [`camera_calibration/README.md`](camera_calibration/README.md).
 
-## Technical Details
+3. Place 4 photos per pose in `4camera/data/full_body/pose1/` (and pose2,
+   pose3), named `01.jpg` through `04.jpg` in the order described in
+   [`4camera/README.md`](4camera/README.md).
 
-- **Language**: Python 3.9+
-- **Key Libraries**: MediaPipe, OpenCV, NumPy, Trimesh
-- **Triangulation**: Direct Linear Transform (DLT)
-- **Mesh Generation**: Geometric primitives or SMPL-X fitting
-- **Visualization**: Plotly, Matplotlib
+4. Run the pipeline:
+   ```bash
+   cd 4camera/scripts
+   python run_pipeline_calibrated.py
+   ```
+
+5. Results appear in `4camera/output/full_body/pose1/` (and pose2, pose3):
+   - `model.obj`: the 3D skeleton
+   - `interactive.html`: a rotatable 3D view in the browser
+   - `*_mediapipe_mesh.obj`: the body mesh
+   - `preview.png`: a static render
+
+See [`4camera/README.md`](4camera/README.md) and
+[`8camera/README.md`](8camera/README.md) for the ready-made rig setups, or
+`GUIDE.md` for the generic root pipeline and a full walkthrough covering
+photo capture, configuration and troubleshooting.
+
+## How it works
+
+The pipeline converts photos into 3D models in four stages:
+
+1. Photo capture: photos are taken from several angles around the subject,
+   who holds a still pose. Each rig folder documents its expected angles and
+   file naming.
+
+2. 2D pose detection: MediaPipe analyzes each photo and detects 33 body
+   landmarks, including 6 foot landmarks per foot, giving pixel coordinates
+   for each joint in each image.
+
+3. 3D triangulation: using the calibrated camera positions and the 2D
+   detections from every view, Direct Linear Transform (DLT) triangulation
+   computes a 3D coordinate for each joint. This is the same principle as
+   stereo vision.
+
+4. Mesh generation: the skeleton is converted into a body mesh, either from
+   geometric primitives (the default, MediaPipe-native approach) or by
+   fitting an SMPL-X model.
+
+## Accuracy factors
+
+Result accuracy depends on:
+1. Subject stillness: any movement between shots introduces error and is
+   usually the largest source of inaccuracy in a walk-around capture.
+2. Camera calibration: required for metric accuracy; see
+   `camera_calibration/README.md`.
+3. Rig geometry: if calibration is skipped, the accuracy of the typed-in
+   rig measurements in `config.yaml` becomes the limiting factor.
+4. Lighting quality: even lighting improves MediaPipe detection.
+
+## Output files
+
+For each pose:
+
+Skeleton files:
+- `model.obj`: 3D skeleton, opens in Blender, MeshLab or Windows 3D Viewer
+- `model.ply`: point cloud format
+- `joints_3d.json`: raw 3D coordinates with accuracy metrics
+- `preview.png`: static 3D render
+- `interactive.html`: browser-based 3D viewer
+
+Mesh files:
+- `*_mediapipe_mesh.obj` / `.ply`: the body mesh
+- `*_mediapipe_mesh_interactive.html`: interactive mesh viewer
+- `*_mediapipe_mesh_preview.png`: mesh preview image
+
+Diagnostic files:
+- `annotated/*.jpg`: photos with the detected skeleton overlaid
+- `keypoints_2d/*.json`: raw 2D detections per photo
+- `cameras.json`: camera projection matrices
+- `reprojection_verification/`: per-camera accuracy report, produced by
+  projecting the 3D result back into each photo
+
+## Checking quality
+
+After running the pipeline:
+
+1. Visual inspection: does `preview.png` look like the pose that was shot?
+2. Reprojection error: printed to the console during triangulation and
+   written to `reprojection_verification/reprojection_summary.txt`.
+   Under about 10% of shoulder width is excellent, under 25% is good and
+   usable, and above that suggests checking the rig measurements or
+   calibration.
+3. Annotated images: check `output/*/pose*/annotated/` for detection
+   quality before trusting the 3D result.
+
+## Common issues
+
+"NO POSE DETECTED": the subject is too small or far in the frame, or
+lighting is poor. Retake the photo with better framing.
+
+High reprojection error: the subject moved between shots, the rig
+measurements do not match reality, or the camera angles are not evenly
+spaced. Calibrating the cameras (see `camera_calibration/README.md`)
+removes the dependency on typed-in rig measurements entirely.
+
+Distorted 3D model: photo filenames must sort alphabetically in the same
+order as the camera angles. Check that `01.jpg` corresponds to the first
+angle, `02.jpg` to the second, and so on.
+
+Missing joints: the joint was not visible with enough confidence in enough
+photos. Lower `min_visibility` in the configuration, or retake the photo
+with better framing.
+
+## Advanced topics
+
+Mesh generation offers two approaches:
+1. MediaPipe-native (default): works immediately, good quality.
+2. SMPL-X (advanced): requires a model download, higher anatomical fidelity.
+
+See `GUIDE.md` for mesh generation details.
+
+To process a new subject or session with the generic root pipeline, create
+new folders under `data/`, update `config.yaml` with the new rig
+measurements, and run the pipeline again.
+
+## Technical details
+
+- Language: Python 3.9+
+- Key libraries: MediaPipe, OpenCV, NumPy, Trimesh
+- Triangulation: Direct Linear Transform (DLT)
+- Mesh generation: geometric primitives or SMPL-X fitting
+- Visualization: Plotly, Matplotlib
 
 ## Limitations
 
-- Requires subject to hold completely still (biggest limitation)
-- Produces sparse skeleton, not dense point cloud
-- Single-camera "walk around" capture introduces timing errors
-- Best results need 8+ simultaneous cameras (or very still subject)
+- Requires the subject to hold still during capture; this is the largest
+  source of error.
+- Produces a sparse skeleton, not a dense point cloud.
+- A single camera walked around the subject introduces timing error between
+  shots; simultaneous multi-camera capture avoids this.
+- Best results need several simultaneous cameras and a real calibration.
 
-## Improvements
+## Improving results
 
-To get better results:
-- Use simultaneous multi-camera capture (eliminates movement error)
-- Increase number of views (12-16 cameras better than 8)
-- Perform camera calibration
-- Use tripod for consistent height/distance
-- Ensure even, diffuse lighting
+- Capture with simultaneous multi-camera rigs rather than walking one
+  camera around the subject.
+- Use more views (8 cameras gives better results than 4, and more still is
+  better for occluded joints).
+- Calibrate the cameras.
+- Use a tripod for a consistent height and distance.
+- Ensure even, diffuse lighting.
 
-## Use Cases
+## Other use cases
 
+Beyond clinical foot assessment, this reconstruction pipeline is generally
+useful for:
 - Biomechanical analysis
 - Pose comparison studies
 - Animation reference
@@ -317,8 +262,10 @@ To get better results:
 
 ## Support
 
-For detailed instructions, see `GUIDE.md`
-For technical dependencies, see `DEPENDENCIES.md`
+For detailed instructions, see `GUIDE.md`.
+For the calibration system, see `camera_calibration/README.md`.
+For the 4-camera and 8-camera rig setups, see `4camera/README.md` and
+`8camera/README.md`.
 
 ## License
 
@@ -328,5 +275,5 @@ See individual library licenses for details.
 ## Credits
 
 - MediaPipe: Google
-- Triangulation algorithms: Standard computer vision techniques
+- Triangulation: standard computer vision techniques
 - SMPL-X: Max Planck Institute (optional, requires separate download)

@@ -39,12 +39,9 @@ This Proof of Concept demonstrates how Kinefeet 2.0 could modernize diabetic foo
 
 ### Setup Steps
 
-1. **Download the project**
-   ```bash
-   cd mp3d
-   ```
+1. **Clone or download the repository**, then move into it.
 
-2. **Create virtual environment**
+2. **Create a virtual environment**
    ```bash
    python -m venv venv
    
@@ -61,15 +58,31 @@ This Proof of Concept demonstrates how Kinefeet 2.0 could modernize diabetic foo
    python setup.py
    ```
 
-   This installs all required packages. The first run will download MediaPipe's pose model (~30MB).
+   This installs all required packages. The first pipeline run downloads MediaPipe's pose model (about 30MB).
 
 ### Verify Installation
 
 ```bash
-python scripts/02_extract_2d_keypoints.py --help
+python -c "import cv2, mediapipe, numpy, yaml, matplotlib; print('Installation OK')"
 ```
 
-If this shows help text, installation succeeded.
+If this prints `Installation OK` without errors, the required packages are installed correctly.
+
+---
+
+## Which pipeline should I use?
+
+If you have exactly 4 or exactly 8 synchronized cameras, use the ready-made
+setups in `4camera/` or `8camera/` instead of the generic pipeline described
+in the rest of this guide. Their README files cover the same steps with the
+folder structure and defaults already set up for that camera count:
+[`4camera/README.md`](4camera/README.md), [`8camera/README.md`](8camera/README.md).
+
+The rest of this guide describes the generic root pipeline
+(`scripts/run_pipeline.py`), which works with any number of cameras at any
+angles through `config.yaml`. Most of the material here (photo capture,
+calibration, troubleshooting) applies equally to the 4-camera and 8-camera
+setups, since they call the same underlying scripts.
 
 ---
 

@@ -38,5 +38,3 @@ triangulation:
   # A landmark needs at least this many usable photos to be triangulated
   # at all. With 8 cameras, we use 3 views for good reliability.
   min_views: 3
-
-# Made with Bob

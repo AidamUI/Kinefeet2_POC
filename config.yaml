@@ -39,5 +39,3 @@ triangulation:
   # at all. With 4 cameras, we need at least 2 views (mathematical minimum).
   # 3 is more robust but may exclude some joints.
   min_views: 2
-
-# Made with Bob
