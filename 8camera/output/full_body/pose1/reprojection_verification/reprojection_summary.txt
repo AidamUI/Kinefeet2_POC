@@ -1,53 +1,57 @@
 Reprojection Error Summary: pose1
 ============================================================
 
+Image Resolution: 720x1280
+Person Scale: 104.3 px (shoulder width)
+Normalization: Using shoulder width (pose-invariant)
+
 Per-Camera Statistics:
 ------------------------------------------------------------
 
 cam01:
-  Mean error: 37.38 px
+  Mean error: 37.38 px (35.85% of shoulder width)
   Max error:  60.70 px
   Min error:  12.22 px
   Std dev:    12.89 px
 
 cam02:
-  Mean error: 49.06 px
+  Mean error: 49.06 px (47.06% of shoulder width)
   Max error:  86.96 px
   Min error:  9.00 px
   Std dev:    25.46 px
 
 cam03:
-  Mean error: 49.67 px
+  Mean error: 49.67 px (47.65% of shoulder width)
   Max error:  105.65 px
   Min error:  5.59 px
   Std dev:    35.83 px
 
 cam04:
-  Mean error: 34.01 px
+  Mean error: 34.01 px (32.63% of shoulder width)
   Max error:  46.35 px
   Min error:  17.69 px
   Std dev:    7.41 px
 
 cam05:
-  Mean error: 26.13 px
+  Mean error: 26.13 px (25.06% of shoulder width)
   Max error:  51.16 px
   Min error:  6.14 px
   Std dev:    16.22 px
 
 cam06:
-  Mean error: 53.93 px
+  Mean error: 53.93 px (51.74% of shoulder width)
   Max error:  85.87 px
   Min error:  35.08 px
   Std dev:    16.34 px
 
 cam07:
-  Mean error: 24.86 px
+  Mean error: 24.86 px (23.85% of shoulder width)
   Max error:  51.75 px
   Min error:  8.40 px
   Std dev:    11.64 px
 
 cam08:
-  Mean error: 40.76 px
+  Mean error: 40.76 px (39.10% of shoulder width)
   Max error:  61.35 px
   Min error:  13.64 px
   Std dev:    12.00 px
@@ -198,10 +202,11 @@ right_knee:
 Overall Summary:
 ------------------------------------------------------------
 Total measurements: 147
-Mean error: 39.28 px
+Mean error: 39.28 px (37.68% of shoulder width)
 Max error:  105.65 px
 Min error:  5.59 px
 Std dev:    21.03 px
 
 Quality Assessment:
-  GOOD - Mean error < 50px
+  NEEDS IMPROVEMENT - Error is 37.68% of shoulder width
+  Consider checking camera rig measurements or subject movement

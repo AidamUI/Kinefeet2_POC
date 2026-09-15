@@ -155,7 +155,9 @@
         7
       ],
       "mean_reprojection_error_px": 31.93611947519545,
-      "max_reprojection_error_px": 60.7039178780279
+      "max_reprojection_error_px": 60.7039178780279,
+      "mean_reprojection_error_normalized": 0.30634091732742763,
+      "max_reprojection_error_normalized": 0.5822903406460309
     },
     "left_shoulder": {
       "status": "ok",
@@ -170,7 +172,9 @@
         7
       ],
       "mean_reprojection_error_px": 31.797645295820306,
-      "max_reprojection_error_px": 56.74207546239816
+      "max_reprojection_error_px": 56.74207546239816,
+      "mean_reprojection_error_normalized": 0.3050126311162963,
+      "max_reprojection_error_normalized": 0.5442871499060483
     },
     "right_shoulder": {
       "status": "ok",
@@ -185,7 +189,9 @@
         7
       ],
       "mean_reprojection_error_px": 26.891646916502356,
-      "max_reprojection_error_px": 47.89329811809079
+      "max_reprojection_error_px": 47.89329811809079,
+      "mean_reprojection_error_normalized": 0.25795281080549015,
+      "max_reprojection_error_normalized": 0.4594070012396866
     },
     "left_elbow": {
       "status": "ok",
@@ -199,7 +205,9 @@
         7
       ],
       "mean_reprojection_error_px": 41.80203598995,
-      "max_reprojection_error_px": 92.01421907718681
+      "max_reprojection_error_px": 92.01421907718681,
+      "mean_reprojection_error_normalized": 0.4009777725581688,
+      "max_reprojection_error_normalized": 0.8826282197862358
     },
     "right_elbow": {
       "status": "ok",
@@ -213,7 +221,9 @@
         7
       ],
       "mean_reprojection_error_px": 27.99994357114311,
-      "max_reprojection_error_px": 38.51147908297607
+      "max_reprojection_error_px": 38.51147908297607,
+      "mean_reprojection_error_normalized": 0.26858392752952637,
+      "max_reprojection_error_normalized": 0.3694137554526019
     },
     "left_wrist": {
       "status": "ok",
@@ -226,7 +236,9 @@
         7
       ],
       "mean_reprojection_error_px": 55.64579451154665,
-      "max_reprojection_error_px": 94.2419773612291
+      "max_reprojection_error_px": 94.2419773612291,
+      "mean_reprojection_error_normalized": 0.5337712914469992,
+      "max_reprojection_error_normalized": 0.9039975510491449
     },
     "right_wrist": {
       "status": "ok",
@@ -239,7 +251,9 @@
         7
       ],
       "mean_reprojection_error_px": 35.85906270674079,
-      "max_reprojection_error_px": 70.94046703466317
+      "max_reprojection_error_px": 70.94046703466317,
+      "mean_reprojection_error_normalized": 0.3439709753283196,
+      "max_reprojection_error_normalized": 0.6804824162783433
     },
     "left_pinky": {
       "status": "ok",
@@ -253,7 +267,9 @@
         7
       ],
       "mean_reprojection_error_px": 58.68877612245409,
-      "max_reprojection_error_px": 105.65355726153355
+      "max_reprojection_error_px": 105.65355726153355,
+      "mean_reprojection_error_normalized": 0.5629604914316718,
+      "max_reprojection_error_normalized": 1.013460876971685
     },
     "right_pinky": {
       "status": "ok",
@@ -266,7 +282,9 @@
         7
       ],
       "mean_reprojection_error_px": 41.103919515425694,
-      "max_reprojection_error_px": 85.86686115346457
+      "max_reprojection_error_px": 85.86686115346457,
+      "mean_reprojection_error_normalized": 0.3942812281839135,
+      "max_reprojection_error_normalized": 0.8236609032669023
     },
     "left_index": {
       "status": "ok",
@@ -279,7 +297,9 @@
         7
       ],
       "mean_reprojection_error_px": 63.362125713300834,
-      "max_reprojection_error_px": 102.3678010696292
+      "max_reprojection_error_px": 102.3678010696292,
+      "mean_reprojection_error_normalized": 0.607788674197073,
+      "max_reprojection_error_normalized": 0.9819429097770781
     },
     "right_index": {
       "status": "ok",
@@ -292,7 +312,9 @@
         7
       ],
       "mean_reprojection_error_px": 40.34257140339272,
-      "max_reprojection_error_px": 84.81095027351058
+      "max_reprojection_error_px": 84.81095027351058,
+      "mean_reprojection_error_normalized": 0.3869781468177871,
+      "max_reprojection_error_normalized": 0.8135322867381362
     },
     "left_thumb": {
       "status": "ok",
@@ -305,7 +327,9 @@
         7
       ],
       "mean_reprojection_error_px": 59.85702831733128,
-      "max_reprojection_error_px": 102.44907944944885
+      "max_reprojection_error_px": 102.44907944944885,
+      "mean_reprojection_error_normalized": 0.5741667198316633,
+      "max_reprojection_error_normalized": 0.9827225565795701
     },
     "right_thumb": {
       "status": "ok",
@@ -318,7 +342,9 @@
         7
       ],
       "mean_reprojection_error_px": 36.1198231626441,
-      "max_reprojection_error_px": 75.55049440994742
+      "max_reprojection_error_px": 75.55049440994742,
+      "mean_reprojection_error_normalized": 0.3464722684903202,
+      "max_reprojection_error_normalized": 0.724703193199785
     },
     "left_hip": {
       "status": "ok",
@@ -333,7 +359,9 @@
         7
       ],
       "mean_reprojection_error_px": 40.00275607890716,
-      "max_reprojection_error_px": 47.53368935754949
+      "max_reprojection_error_px": 47.53368935754949,
+      "mean_reprojection_error_normalized": 0.3837185354456015,
+      "max_reprojection_error_normalized": 0.45595752524217964
     },
     "right_hip": {
       "status": "ok",
@@ -348,7 +376,9 @@
         7
       ],
       "mean_reprojection_error_px": 26.319431808761298,
-      "max_reprojection_error_px": 44.73320265068607
+      "max_reprojection_error_px": 44.73320265068607,
+      "mean_reprojection_error_normalized": 0.25246395042124226,
+      "max_reprojection_error_normalized": 0.42909440972151863
     },
     "left_knee": {
       "status": "ok",
@@ -362,7 +392,9 @@
         7
       ],
       "mean_reprojection_error_px": 37.40065436556295,
-      "max_reprojection_error_px": 62.53254480345624
+      "max_reprojection_error_px": 62.53254480345624,
+      "mean_reprojection_error_normalized": 0.3587583887858215,
+      "max_reprojection_error_normalized": 0.5998310831968108
     },
     "right_knee": {
       "status": "ok",
@@ -375,7 +407,9 @@
         7
       ],
       "mean_reprojection_error_px": 30.97505094867597,
-      "max_reprojection_error_px": 57.35796602700984
+      "max_reprojection_error_px": 57.35796602700984,
+      "mean_reprojection_error_normalized": 0.29712205733859376,
+      "max_reprojection_error_normalized": 0.550194958482572
     },
     "left_ankle": {
       "status": "ok",
@@ -389,7 +423,9 @@
         7
       ],
       "mean_reprojection_error_px": 38.58794446828733,
-      "max_reprojection_error_px": 71.84450816835573
+      "max_reprojection_error_px": 71.84450816835573,
+      "mean_reprojection_error_normalized": 0.3701472345560428,
+      "max_reprojection_error_normalized": 0.6891542522668141
     },
     "right_ankle": {
       "status": "ok",
@@ -403,7 +439,9 @@
         7
       ],
       "mean_reprojection_error_px": 39.89260740063878,
-      "max_reprojection_error_px": 73.029819758496
+      "max_reprojection_error_px": 73.029819758496,
+      "mean_reprojection_error_normalized": 0.3826619560083488,
+      "max_reprojection_error_normalized": 0.7005241195459125
     },
     "left_heel": {
       "status": "ok",
@@ -418,7 +456,9 @@
         7
       ],
       "mean_reprojection_error_px": 39.856507883683484,
-      "max_reprojection_error_px": 70.8002518862174
+      "max_reprojection_error_px": 70.8002518862174,
+      "mean_reprojection_error_normalized": 0.3823156785231411,
+      "max_reprojection_error_normalized": 0.6791374301653171
     },
     "right_heel": {
       "status": "ok",
@@ -432,7 +472,9 @@
         7
       ],
       "mean_reprojection_error_px": 41.94204610812888,
-      "max_reprojection_error_px": 68.52482011367074
+      "max_reprojection_error_px": 68.52482011367074,
+      "mean_reprojection_error_normalized": 0.4023207919588619,
+      "max_reprojection_error_normalized": 0.6573108003814664
     },
     "left_foot_index": {
       "status": "ok",
@@ -447,7 +489,9 @@
         7
       ],
       "mean_reprojection_error_px": 39.669293872557745,
-      "max_reprojection_error_px": 86.95889118738576
+      "max_reprojection_error_px": 86.95889118738576,
+      "mean_reprojection_error_normalized": 0.3805198651041266,
+      "max_reprojection_error_normalized": 0.8341359856450338
     },
     "right_foot_index": {
       "status": "ok",
@@ -461,7 +505,12 @@
         7
       ],
       "mean_reprojection_error_px": 35.2932655962407,
-      "max_reprojection_error_px": 67.67480987705822
+      "max_reprojection_error_px": 67.67480987705822,
+      "mean_reprojection_error_normalized": 0.33854367831477905,
+      "max_reprojection_error_normalized": 0.6491572450998415
     }
-  }
+  },
+  "image_width": 720,
+  "image_height": 1280,
+  "person_scale_px": 104.25025737277217
 }

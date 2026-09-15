@@ -1,35 +1,39 @@
 Reprojection Error Summary: pose2
 ============================================================
 
+Image Resolution: 720x1280
+Person Scale: 141.8 px (shoulder width)
+Normalization: Using shoulder width (pose-invariant)
+
 Per-Camera Statistics:
 ------------------------------------------------------------
 
 cam03:
-  Mean error: 269.13 px
+  Mean error: 269.13 px (189.84% of shoulder width)
   Max error:  609.53 px
   Min error:  113.63 px
   Std dev:    180.87 px
 
 cam04:
-  Mean error: 196.92 px
+  Mean error: 196.92 px (138.90% of shoulder width)
   Max error:  374.13 px
   Min error:  13.98 px
   Std dev:    99.41 px
 
 cam06:
-  Mean error: 298.03 px
+  Mean error: 298.03 px (210.22% of shoulder width)
   Max error:  393.82 px
   Min error:  100.40 px
   Std dev:    93.10 px
 
 cam07:
-  Mean error: 433.60 px
+  Mean error: 433.60 px (305.84% of shoulder width)
   Max error:  975.18 px
   Min error:  217.72 px
   Std dev:    208.10 px
 
 cam08:
-  Mean error: 271.12 px
+  Mean error: 271.12 px (191.24% of shoulder width)
   Max error:  290.71 px
   Min error:  251.54 px
   Std dev:    19.59 px
@@ -102,10 +106,11 @@ right_hip:
 Overall Summary:
 ------------------------------------------------------------
 Total measurements: 33
-Mean error: 302.46 px
+Mean error: 302.46 px (213.35% of shoulder width)
 Max error:  975.18 px
 Min error:  13.98 px
 Std dev:    177.46 px
 
 Quality Assessment:
-  POOR - Mean error > 100px
+  NEEDS IMPROVEMENT - Error is 213.35% of shoulder width
+  Consider checking camera rig measurements or subject movement
