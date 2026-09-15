@@ -18,8 +18,8 @@ import numpy as np
 # ---------------------------------------------------------------------------
 # 1. LANDMARK DEFINITIONS
 # ---------------------------------------------------------------------------
-# BlazePose (the model MediaPipe Pose uses) always outputs the SAME 33
-# landmarks, in the SAME order, no matter which image you feed it. Indices
+# BlazePose (the model MediaPipe Pose uses) always outputs the same 33
+# landmarks, in the same order, no matter which image is fed to it. Indices
 # below match MediaPipe's official documentation.
 
 LANDMARK_NAMES = {
@@ -48,10 +48,10 @@ POSE_CONNECTIONS_ALL = [
     (27, 29), (28, 30), (29, 31), (30, 32), (27, 31), (28, 32),
 ]
 
-# For the "full body" model we drop the fine face landmarks (1-10, the
+# The "full body" model drops the fine face landmarks (1-10, the
 # eyes/ears/mouth points) because they add visual clutter and MediaPipe's
-# face localisation is not what we care about for a body model. We KEEP
-# the nose (0) as a single head marker.
+# face localisation is not relevant for a body model. The nose (0) is kept
+# as a single head marker.
 FACE_DETAIL_LANDMARKS = set(range(1, 11))
 FULL_BODY_LANDMARKS = [i for i in range(NUM_LANDMARKS) if i not in FACE_DETAIL_LANDMARKS]
 FULL_BODY_CONNECTIONS = [
@@ -79,23 +79,22 @@ def landmarks_for_version(version: str):
 # ---------------------------------------------------------------------------
 # 2. CAMERA RIG MATH
 # ---------------------------------------------------------------------------
-# We assume photos were taken by walking a single camera around the subject
-# on an (approximate) circle, evenly spaced in angle, all pointed at a fixed
-# target point on the subject's body. This is the "turntable" or "orbit
-# rig" assumption. It is not as accurate as a full structure-from-motion
-# solve (see README "Improving accuracy"), but it is simple, requires no
-# feature matching, and works well enough for a body skeleton as long as
-# the measurements (radius / height / target height) are reasonably
-# accurate and the subject does not move between shots.
+# This assumes photos were taken by walking a single camera around the
+# subject on an approximate circle, evenly spaced in angle, all pointed at a
+# fixed target point on the subject's body. This is the "turntable" or
+# "orbit rig" assumption. It is not as accurate as a full structure-from-motion
+# solve (see README.md, "Improving results"), but it is simple, requires no
+# feature matching, and works well enough for a body skeleton as long as the
+# measurements (radius, height, target height) are reasonably accurate and
+# the subject does not move between shots.
 
 def build_intrinsics(image_width, image_height, sensor_fov_deg=60.0):
     """
     Build a pinhole camera intrinsic matrix K.
 
-    If you ran 01_calibrate_camera.py, you already have a precise K from a
-    checkerboard and should load that JSON instead of calling this
-    function (04_triangulate_3d.py does this automatically - see
-    config.yaml -> calibration.use_checkerboard).
+    This is a fallback. camera_calibration/ measures K properly from the
+    square-grid board and writes it into cameras.json, which is what
+    04_triangulate_3d.py reads.
 
     Otherwise, this builds an *approximate* K from a guessed horizontal
     field of view. Most modern phone main cameras are roughly 60-75

@@ -1,0 +1,211 @@
+{
+  "pose": "pose2",
+  "version": "waist_down",
+  "joints": {
+    "left_hip": {
+      "index": 23,
+      "x": 0.39870278121468505,
+      "y": -0.19552496649861603,
+      "z": 1.1252028786861041
+    },
+    "right_hip": {
+      "index": 24,
+      "x": -0.017401692333355874,
+      "y": -0.2541188579875653,
+      "z": 1.2007118155095085
+    },
+    "left_knee": {
+      "index": 25,
+      "x": 0.4312835812180423,
+      "y": 0.07213357075630397,
+      "z": 0.44760492845794353
+    },
+    "right_knee": {
+      "index": 26,
+      "x": -0.40088789254497087,
+      "y": -0.7099190765106482,
+      "z": 0.5515935373460107
+    },
+    "left_ankle": {
+      "index": 27,
+      "x": 0.5183215791749035,
+      "y": 0.45908828266190976,
+      "z": -0.07165392089434965
+    },
+    "right_ankle": {
+      "index": 28,
+      "x": -0.38360932072562354,
+      "y": -0.5289290709544536,
+      "z": -0.357788683875573
+    },
+    "left_heel": {
+      "index": 29,
+      "x": 0.4343446136084004,
+      "y": 0.5539698716982511,
+      "z": -0.18902542739566283
+    },
+    "right_heel": {
+      "index": 30,
+      "x": -0.30400446605523446,
+      "y": -0.4452340769009101,
+      "z": -0.5064992787138684
+    },
+    "left_foot_index": {
+      "index": 31,
+      "x": 0.37869115737697906,
+      "y": 0.35761996636117116,
+      "z": -0.2327064166261765
+    },
+    "right_foot_index": {
+      "index": 32,
+      "x": -0.5899968626421305,
+      "y": -0.8613229271155627,
+      "z": -0.6789274899937411
+    }
+  },
+  "diagnostics": {
+    "left_hip": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "mean_reprojection_error_px": 83.8739610695441,
+      "max_reprojection_error_px": 128.46286516929035,
+      "mean_reprojection_error_normalized": 0.5916183519524838,
+      "max_reprojection_error_normalized": 0.9061332934488866
+    },
+    "right_hip": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "mean_reprojection_error_px": 91.54180073309871,
+      "max_reprojection_error_px": 166.65536166325614,
+      "mean_reprojection_error_normalized": 0.6457046810937376,
+      "max_reprojection_error_normalized": 1.17553015446009
+    },
+    "left_knee": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "mean_reprojection_error_px": 60.93579568656658,
+      "max_reprojection_error_px": 153.2893874848784,
+      "mean_reprojection_error_normalized": 0.429820346616375,
+      "max_reprojection_error_normalized": 1.0812511253691097
+    },
+    "right_knee": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "mean_reprojection_error_px": 114.97565858090029,
+      "max_reprojection_error_px": 391.49152562607844,
+      "mean_reprojection_error_normalized": 0.8109991322322726,
+      "max_reprojection_error_normalized": 2.7614478705998122
+    },
+    "left_ankle": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "mean_reprojection_error_px": 136.9355515440636,
+      "max_reprojection_error_px": 280.60383412316605,
+      "mean_reprojection_error_normalized": 0.9658967371414698,
+      "max_reprojection_error_normalized": 1.9792838656785046
+    },
+    "right_ankle": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "mean_reprojection_error_px": 125.91789971605382,
+      "max_reprojection_error_px": 447.25163914648283,
+      "mean_reprojection_error_normalized": 0.8881819740164898,
+      "max_reprojection_error_normalized": 3.1547607181744306
+    },
+    "left_heel": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "mean_reprojection_error_px": 148.51710015714397,
+      "max_reprojection_error_px": 309.82080816164785,
+      "mean_reprojection_error_normalized": 1.0475890361119091,
+      "max_reprojection_error_normalized": 2.185370448561516
+    },
+    "right_heel": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "mean_reprojection_error_px": 109.57542337054943,
+      "max_reprojection_error_px": 394.91747903501084,
+      "mean_reprojection_error_normalized": 0.7729077125048257,
+      "max_reprojection_error_normalized": 2.785613378986593
+    },
+    "left_foot_index": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "mean_reprojection_error_px": 123.39278090601742,
+      "max_reprojection_error_px": 226.78869393178962,
+      "mean_reprojection_error_normalized": 0.870370646044996,
+      "max_reprojection_error_normalized": 1.599690197463461
+    },
+    "right_foot_index": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "mean_reprojection_error_px": 221.6666071981108,
+      "max_reprojection_error_px": 829.9654891360981,
+      "mean_reprojection_error_normalized": 1.5635607423465845,
+      "max_reprojection_error_normalized": 5.854293854716172
+    }
+  },
+  "image_width": 720,
+  "image_height": 1280,
+  "person_scale_px": 141.77038422276746
+}

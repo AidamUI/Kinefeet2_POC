@@ -2,44 +2,47 @@
 06_fit_smplx_mesh.py
 -----------------------
 Turns the sparse 3D skeleton from script 04 (output/<version>/<pose>/joints_3d.json)
-into a full humanoid SMPL-X mesh (10,475 vertices, a real body surface - not just
-joints-and-lines) by optimizing SMPL-X's shape/pose parameters so that its joints
-line up with your triangulated joints as closely as possible.
+into a full humanoid SMPL-X mesh (10,475 vertices, a real body surface rather
+than just joints and lines) by optimizing SMPL-X's shape and pose parameters
+so that its joints line up with the triangulated joints as closely as
+possible.
 
-This is a simplified version of the standard "SMPLify" approach:
-  1. A rigid (Kabsch/Procrustes) alignment gives a good initial global rotation +
-     position - this avoids the optimizer getting stuck rotated/flipped.
-  2. Stage A: optimize global position/orientation + body shape (betas) with the
-     body held in a neutral pose.
-  3. Stage B: unfreeze the joint rotations (body_pose) and refine everything
-     together with gradient descent (Adam), minimizing 3D joint distance plus a
-     small regularization term that discourages unnaturally extreme poses/shapes.
+This is a simplified version of the standard SMPLify approach:
+  1. A rigid (Kabsch/Procrustes) alignment gives a good initial global
+     rotation and position, so the optimizer does not get stuck rotated or
+     flipped.
+  2. Stage A optimizes global position and orientation plus body shape
+     (betas), with the body held in a neutral pose.
+  3. Stage B unfreezes the joint rotations (body_pose) and refines
+     everything together with gradient descent (Adam), minimizing 3D joint
+     distance plus a small regularization term that discourages unnaturally
+     extreme poses or shapes.
 
-IMPORTANT - waist_down version: SMPL-X models the WHOLE body, but our waist-down
-captures only contain leg/hip data. For that version this script only lets the
-optimizer move the LOWER body joints (hips/knees/ankles/feet) - the upper body
-(spine/shoulders/arms/head) is deliberately held in its neutral resting pose
-because we simply have no data to inform it. Read that as "accurate legs, generic
-torso", not a defect.
+For the waist_down version: SMPL-X models the whole body, but waist-down
+captures only contain leg and hip data. For that version, this script only
+lets the optimizer move the lower body joints (hips, knees, ankles, feet).
+The upper body (spine, shoulders, arms, head) is deliberately held in its
+neutral resting pose, since there is no data to inform it. The result is
+accurate legs with a generic torso, which is expected rather than a defect.
 
-============================================================================
-BEFORE YOU RUN THIS: you need the actual SMPL-X model files.
-============================================================================
-The `smplx` Python package (installed via requirements-smplx.txt) is just code -
-the trained model weights are distributed separately under their own license and
-can't be auto-downloaded:
+Before running this script, the actual SMPL-X model files are needed. The
+`smplx` Python package is just code; the trained model weights are
+distributed separately under their own license and cannot be downloaded
+automatically:
 
   1. Register (free) at https://smpl-x.is.tue.mpg.de/
-  2. Download the "SMPL-X v1.1" model package
+  2. Download the "SMPL-X v1.1" model package.
   3. Unzip it and arrange the files as:
        models_smplx/smplx/SMPLX_NEUTRAL.npz
        models_smplx/smplx/SMPLX_MALE.npz      (optional)
        models_smplx/smplx/SMPLX_FEMALE.npz    (optional)
      (models_smplx/ lives at the project root, next to config.yaml)
-  4. pip install -r requirements-smplx.txt
+  4. Install the extra dependencies: `pip install smplx torch trimesh`
   5. Run this script.
 
-See SMPLX_MESH_GUIDE.md for the full walkthrough.
+See GUIDE.md, Mesh Generation section, for the full walkthrough, including
+the simpler MediaPipe-native mesh option in script 07 that needs no model
+download.
 
 INPUT   output/<version>/<pose>/joints_3d.json     (from script 04)
 OUTPUT  output/<version>/<pose>/smplx_mesh.obj      full textured-ready mesh
@@ -196,7 +199,7 @@ def ensure_model_files():
     print(f"       {smplx_dir}/SMPLX_MALE.npz    (optional)")
     print(f"       {smplx_dir}/SMPLX_FEMALE.npz  (optional)")
     print("  4. Re-run this script.")
-    print("See SMPLX_MESH_GUIDE.md for details.")
+    print("See GUIDE.md, Mesh Generation section, for details.")
     print("=" * 72)
     sys.exit(1)
 
@@ -208,16 +211,16 @@ def build_model():
         model_type="smplx",
         gender=GENDER,
         num_betas=NUM_BETAS,
-        use_pca=False,          # we never touch hand pose, this just avoids the PCA hand basis
+        use_pca=False,          # hand pose is never touched here, this just avoids the PCA hand basis
         batch_size=1,
     )
     return model
 
 
 # --------------------------------------------------------------------------
-# The actual fitting routine (pure logic - takes a pre-built `model`, so it
-# can be unit-tested with a stand-in model that doesn't need the licensed
-# weights; see the project's test suite / SMPLX_MESH_GUIDE.md notes)
+# The actual fitting routine. It is pure logic that takes a pre-built
+# `model`, so it can be tested with a stand-in model that does not need the
+# licensed SMPL-X weights.
 # --------------------------------------------------------------------------
 
 def fit_one(model, targets, free_joints):

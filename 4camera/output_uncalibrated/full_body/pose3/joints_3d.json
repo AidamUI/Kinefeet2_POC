@@ -1,0 +1,437 @@
+{
+  "pose": "pose3",
+  "version": "full_body",
+  "joints": {
+    "nose": {
+      "index": 0,
+      "x": -0.12049002703790271,
+      "y": 0.027151628119136045,
+      "z": 1.8051015003575646
+    },
+    "left_shoulder": {
+      "index": 11,
+      "x": 0.019149032437900983,
+      "y": 0.2802196991082325,
+      "z": 1.5928147619633033
+    },
+    "right_shoulder": {
+      "index": 12,
+      "x": 0.06941594416078227,
+      "y": -0.21010773454811313,
+      "z": 1.5829290836094974
+    },
+    "left_elbow": {
+      "index": 13,
+      "x": -0.055666924888559705,
+      "y": 0.6054141866697731,
+      "z": 1.5944014108753435
+    },
+    "right_elbow": {
+      "index": 14,
+      "x": 0.0922791469137892,
+      "y": -0.5775898875151146,
+      "z": 1.5573479736155122
+    },
+    "left_wrist": {
+      "index": 15,
+      "x": -0.19256556292592175,
+      "y": 0.8977649503547263,
+      "z": 1.7088356133806917
+    },
+    "right_wrist": {
+      "index": 16,
+      "x": 0.02922110727535407,
+      "y": -0.8927153689819705,
+      "z": 1.688989507448298
+    },
+    "left_pinky": {
+      "index": 17,
+      "x": -0.2235682295611971,
+      "y": 0.9766705563824544,
+      "z": 1.722396674956262
+    },
+    "right_pinky": {
+      "index": 18,
+      "x": 0.005485325897976294,
+      "y": -0.9765032778930743,
+      "z": 1.7118906647054122
+    },
+    "left_index": {
+      "index": 19,
+      "x": -0.22595638102584362,
+      "y": 0.9861453414306676,
+      "z": 1.7391885236956468
+    },
+    "right_index": {
+      "index": 20,
+      "x": -0.0053154144467331,
+      "y": -0.984463552038083,
+      "z": 1.7247725180245628
+    },
+    "left_thumb": {
+      "index": 21,
+      "x": -0.2180720969087502,
+      "y": 0.9365885788974736,
+      "z": 1.740122308157769
+    },
+    "right_thumb": {
+      "index": 22,
+      "x": -0.01113320838708669,
+      "y": -0.9741920929254215,
+      "z": 1.7187275272815918
+    },
+    "left_hip": {
+      "index": 23,
+      "x": -0.012874248577756573,
+      "y": 0.1585919287409066,
+      "z": 0.9330765299045121
+    },
+    "right_hip": {
+      "index": 24,
+      "x": 0.03217872878703329,
+      "y": -0.10477747724183513,
+      "z": 0.9375861676849774
+    },
+    "left_knee": {
+      "index": 25,
+      "x": -0.07532470117432491,
+      "y": 0.1540139076558814,
+      "z": 0.41200203452874146
+    },
+    "right_knee": {
+      "index": 26,
+      "x": 0.09231719816933193,
+      "y": -0.148414337500726,
+      "z": 0.4470702501822383
+    },
+    "left_ankle": {
+      "index": 27,
+      "x": -0.09196020698296482,
+      "y": 0.14672400523445828,
+      "z": -0.09466561819886538
+    },
+    "right_ankle": {
+      "index": 28,
+      "x": 0.028447240540842498,
+      "y": -0.1045804808025916,
+      "z": -0.034752262584872406
+    },
+    "left_heel": {
+      "index": 29,
+      "x": -0.05821193134460681,
+      "y": 0.12455332262382958,
+      "z": -0.17363943342937715
+    },
+    "right_heel": {
+      "index": 30,
+      "x": 0.01994605008500644,
+      "y": -0.06774562684565492,
+      "z": -0.1285335821280978
+    },
+    "left_foot_index": {
+      "index": 31,
+      "x": -0.15497961051117198,
+      "y": 0.1469159816440979,
+      "z": -0.17765723554422955
+    },
+    "right_foot_index": {
+      "index": 32,
+      "x": -0.041182842698007635,
+      "y": -0.12049863116109095,
+      "z": -0.1449728949592888
+    }
+  },
+  "diagnostics": {
+    "nose": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "mean_reprojection_error_px": 20.27516106981512,
+      "max_reprojection_error_px": 27.735472085076278,
+      "mean_reprojection_error_normalized": 0.35855153829915276,
+      "max_reprojection_error_normalized": 0.49048173512971205
+    },
+    "left_shoulder": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "mean_reprojection_error_px": 27.528625242463125,
+      "max_reprojection_error_px": 36.594078972686546,
+      "mean_reprojection_error_normalized": 0.4868237985364643,
+      "max_reprojection_error_normalized": 0.6471397816824882
+    },
+    "right_shoulder": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "mean_reprojection_error_px": 20.45811280224195,
+      "max_reprojection_error_px": 34.76177381969993,
+      "mean_reprojection_error_normalized": 0.36178690717589096,
+      "max_reprojection_error_normalized": 0.6147367921834358
+    },
+    "left_elbow": {
+      "status": "ok",
+      "views_used": [
+        0,
+        2,
+        3
+      ],
+      "mean_reprojection_error_px": 22.71359073279885,
+      "max_reprojection_error_px": 29.69713047763953,
+      "mean_reprojection_error_normalized": 0.4016734007438723,
+      "max_reprojection_error_normalized": 0.5251722429806275
+    },
+    "right_elbow": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2
+      ],
+      "mean_reprojection_error_px": 13.659147828595282,
+      "max_reprojection_error_px": 19.97781422295979,
+      "mean_reprojection_error_normalized": 0.24155213608091097,
+      "max_reprojection_error_normalized": 0.3532931746796842
+    },
+    "left_wrist": {
+      "status": "ok",
+      "views_used": [
+        0,
+        2,
+        3
+      ],
+      "mean_reprojection_error_px": 28.84592053490471,
+      "max_reprojection_error_px": 36.17655445360359,
+      "mean_reprojection_error_normalized": 0.5101192116714224,
+      "max_reprojection_error_normalized": 0.639756162973896
+    },
+    "right_wrist": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2
+      ],
+      "mean_reprojection_error_px": 26.02045116251772,
+      "max_reprojection_error_px": 36.494472110459945,
+      "mean_reprojection_error_normalized": 0.4601528322972666,
+      "max_reprojection_error_normalized": 0.6453783064688747
+    },
+    "left_pinky": {
+      "status": "ok",
+      "views_used": [
+        0,
+        2,
+        3
+      ],
+      "mean_reprojection_error_px": 30.740539684683892,
+      "max_reprojection_error_px": 41.15528109284642,
+      "mean_reprojection_error_normalized": 0.5436241790699652,
+      "max_reprojection_error_normalized": 0.7278013375165101
+    },
+    "right_pinky": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2
+      ],
+      "mean_reprojection_error_px": 30.219365912278686,
+      "max_reprojection_error_px": 41.52980278489634,
+      "mean_reprojection_error_normalized": 0.5344075983891211,
+      "max_reprojection_error_normalized": 0.7344244823758039
+    },
+    "left_index": {
+      "status": "ok",
+      "views_used": [
+        0,
+        2,
+        3
+      ],
+      "mean_reprojection_error_px": 30.665551405178817,
+      "max_reprojection_error_px": 39.91272438032899,
+      "mean_reprojection_error_normalized": 0.542298065660638,
+      "max_reprojection_error_normalized": 0.7058276220346471
+    },
+    "right_index": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2
+      ],
+      "mean_reprojection_error_px": 31.159377837642953,
+      "max_reprojection_error_px": 41.35160160788203,
+      "mean_reprojection_error_normalized": 0.5510310284421964,
+      "max_reprojection_error_normalized": 0.7312731236307273
+    },
+    "left_thumb": {
+      "status": "ok",
+      "views_used": [
+        0,
+        2,
+        3
+      ],
+      "mean_reprojection_error_px": 31.92672313093077,
+      "max_reprojection_error_px": 43.56727059285703,
+      "mean_reprojection_error_normalized": 0.5646009741687716,
+      "max_reprojection_error_normalized": 0.7704556248295575
+    },
+    "right_thumb": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2
+      ],
+      "mean_reprojection_error_px": 31.296392477269976,
+      "max_reprojection_error_px": 38.98207063826585,
+      "mean_reprojection_error_normalized": 0.5534540331048282,
+      "max_reprojection_error_normalized": 0.6893696846751565
+    },
+    "left_hip": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "mean_reprojection_error_px": 24.210289271468778,
+      "max_reprojection_error_px": 29.352225665831035,
+      "mean_reprojection_error_normalized": 0.42814143034730323,
+      "max_reprojection_error_normalized": 0.5190728511970119
+    },
+    "right_hip": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "mean_reprojection_error_px": 20.57123917596734,
+      "max_reprojection_error_px": 27.476930932164635,
+      "mean_reprojection_error_normalized": 0.36378746515823074,
+      "max_reprojection_error_normalized": 0.48590962210082395
+    },
+    "left_knee": {
+      "status": "ok",
+      "views_used": [
+        0,
+        2,
+        3
+      ],
+      "mean_reprojection_error_px": 16.203226370764188,
+      "max_reprojection_error_px": 27.580478622937697,
+      "mean_reprojection_error_normalized": 0.2865423224329469,
+      "max_reprojection_error_normalized": 0.48774078801295473
+    },
+    "right_knee": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "mean_reprojection_error_px": 22.127194021663996,
+      "max_reprojection_error_px": 30.380083437837175,
+      "mean_reprojection_error_normalized": 0.39130339963231603,
+      "max_reprojection_error_normalized": 0.5372497714215426
+    },
+    "left_ankle": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "mean_reprojection_error_px": 31.05923627969194,
+      "max_reprojection_error_px": 66.60352144520554,
+      "mean_reprojection_error_normalized": 0.5492600975219748,
+      "max_reprojection_error_normalized": 1.1778350360861924
+    },
+    "right_ankle": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "mean_reprojection_error_px": 19.904191416171606,
+      "max_reprojection_error_px": 26.37752617270095,
+      "mean_reprojection_error_normalized": 0.3519912086663486,
+      "max_reprojection_error_normalized": 0.46646744522431205
+    },
+    "left_heel": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "mean_reprojection_error_px": 31.687413155302806,
+      "max_reprojection_error_px": 61.8729925733827,
+      "mean_reprojection_error_normalized": 0.5603689505810783,
+      "max_reprojection_error_normalized": 1.0941790592917204
+    },
+    "right_heel": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "mean_reprojection_error_px": 19.259372132011354,
+      "max_reprojection_error_px": 29.869641176464203,
+      "mean_reprojection_error_normalized": 0.34058804666608117,
+      "max_reprojection_error_normalized": 0.5282229697405117
+    },
+    "left_foot_index": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "mean_reprojection_error_px": 35.33098945663142,
+      "max_reprojection_error_px": 52.720556307654604,
+      "mean_reprojection_error_normalized": 0.624802958441891,
+      "max_reprojection_error_normalized": 0.9323248530064095
+    },
+    "right_foot_index": {
+      "status": "ok",
+      "views_used": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "mean_reprojection_error_px": 23.29593566226873,
+      "max_reprojection_error_px": 30.171924035297593,
+      "mean_reprojection_error_normalized": 0.4119717490313733,
+      "max_reprojection_error_normalized": 0.533568623156678
+    }
+  },
+  "image_width": 636,
+  "image_height": 475,
+  "person_scale_px": 56.54741063444778
+}

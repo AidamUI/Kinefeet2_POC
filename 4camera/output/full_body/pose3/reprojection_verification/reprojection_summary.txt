@@ -1,0 +1,187 @@
+Reprojection Error Summary: pose3
+============================================================
+
+Image Resolution: 636x475
+Person Scale: 56.5 px (shoulder width)
+Normalization: Using shoulder width (pose-invariant)
+
+Per-Camera Statistics:
+------------------------------------------------------------
+
+cam01:
+  Mean error: 3.68 px (6.51% of shoulder width)
+  Max error:  7.60 px
+  Min error:  1.17 px
+  Std dev:    1.94 px
+
+cam02:
+  Mean error: 6.29 px (11.12% of shoulder width)
+  Max error:  29.37 px
+  Min error:  1.57 px
+  Std dev:    7.12 px
+
+cam03:
+  Mean error: 4.34 px (7.68% of shoulder width)
+  Max error:  10.26 px
+  Min error:  1.07 px
+  Std dev:    2.63 px
+
+cam04:
+  Mean error: 6.13 px (10.85% of shoulder width)
+  Max error:  12.23 px
+  Min error:  1.44 px
+  Std dev:    3.14 px
+
+
+Per-Landmark Statistics:
+------------------------------------------------------------
+
+right_elbow:
+  Mean: 15.74 px
+  Max:  29.37 px
+  Views: 3
+  Diagnostic mean: 15.744129399775675
+
+left_elbow:
+  Mean: 8.87 px
+  Max:  11.51 px
+  Views: 3
+  Diagnostic mean: 8.867359357813438
+
+left_shoulder:
+  Mean: 7.17 px
+  Max:  12.23 px
+  Views: 4
+  Diagnostic mean: 7.174733700365252
+
+right_foot_index:
+  Mean: 7.16 px
+  Max:  9.56 px
+  Views: 4
+  Diagnostic mean: 7.162716468111109
+
+right_hip:
+  Mean: 7.13 px
+  Max:  10.98 px
+  Views: 4
+  Diagnostic mean: 7.126184476920457
+
+left_hip:
+  Mean: 6.67 px
+  Max:  9.67 px
+  Views: 4
+  Diagnostic mean: 6.666755257503917
+
+left_foot_index:
+  Mean: 5.56 px
+  Max:  7.30 px
+  Views: 3
+  Diagnostic mean: 7.473019325849952
+
+left_knee:
+  Mean: 5.49 px
+  Max:  8.42 px
+  Views: 3
+  Diagnostic mean: 5.493854357799969
+
+right_heel:
+  Mean: 4.29 px
+  Max:  6.64 px
+  Views: 4
+  Diagnostic mean: 4.287938394267202
+
+right_wrist:
+  Mean: 4.23 px
+  Max:  6.07 px
+  Views: 3
+  Diagnostic mean: 4.227908752634398
+
+right_shoulder:
+  Mean: 3.96 px
+  Max:  5.33 px
+  Views: 4
+  Diagnostic mean: 3.960434526345624
+
+left_thumb:
+  Mean: 3.87 px
+  Max:  5.31 px
+  Views: 3
+  Diagnostic mean: 3.8663153799102603
+
+left_pinky:
+  Mean: 3.50 px
+  Max:  5.11 px
+  Views: 3
+  Diagnostic mean: 3.500031266868574
+
+left_index:
+  Mean: 3.43 px
+  Max:  4.65 px
+  Views: 3
+  Diagnostic mean: 3.4337637281349926
+
+right_knee:
+  Mean: 3.37 px
+  Max:  4.65 px
+  Views: 2
+  Diagnostic mean: 7.561755565823567
+
+left_wrist:
+  Mean: 3.35 px
+  Max:  3.48 px
+  Views: 3
+  Diagnostic mean: 3.3455303405669152
+
+nose:
+  Mean: 3.17 px
+  Max:  3.92 px
+  Views: 4
+  Diagnostic mean: 3.165423825544922
+
+left_heel:
+  Mean: 2.76 px
+  Max:  3.55 px
+  Views: 3
+  Diagnostic mean: 4.507709936812827
+
+right_ankle:
+  Mean: 2.66 px
+  Max:  3.10 px
+  Views: 3
+  Diagnostic mean: 2.9630088353380737
+
+right_thumb:
+  Mean: 1.94 px
+  Max:  2.54 px
+  Views: 3
+  Diagnostic mean: 1.9419983065842772
+
+right_index:
+  Mean: 1.86 px
+  Max:  2.26 px
+  Views: 3
+  Diagnostic mean: 1.8644104995830533
+
+right_pinky:
+  Mean: 1.72 px
+  Max:  1.83 px
+  Views: 3
+  Diagnostic mean: 1.715034512741612
+
+left_ankle:
+  Mean: 1.53 px
+  Max:  1.98 px
+  Views: 3
+  Diagnostic mean: 3.5595200512576177
+
+
+Overall Summary:
+------------------------------------------------------------
+Total measurements: 75
+Mean error: 4.86 px (8.59% of shoulder width)
+Max error:  29.37 px
+Min error:  1.07 px
+Std dev:    3.92 px
+
+Quality Assessment:
+  EXCELLENT - Error is 8.59% of shoulder width

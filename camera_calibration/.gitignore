@@ -1,0 +1,6 @@
+__pycache__/
+*.py[cod]
+
+# Detector cache and annotated debug renders - both are regenerable.
+output/.detection_cache/
+output/debug/

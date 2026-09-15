@@ -1,8 +1,12 @@
 """
 run_pipeline.py
 -----------------
-Convenience script that runs steps 02-05 in order (step 01, checkerboard
-calibration, is optional and manual - see README).
+Convenience script that runs steps 02, 03, 04, 05 and 08 in order.
+
+Camera calibration is a separate, one-time step: see camera_calibration/README.md.
+03_setup_camera_rig.py only builds an approximate camera ring from
+config.yaml measurements, and skips itself automatically once
+camera_calibration/ has produced a real cameras.json.
 
 Usage:
     python run_pipeline.py
@@ -12,6 +16,7 @@ Equivalent to running these one at a time:
     python 03_setup_camera_rig.py
     python 04_triangulate_3d.py
     python 05_export_and_visualize.py
+    python 08_verify_reprojection.py
 """
 
 import runpy
