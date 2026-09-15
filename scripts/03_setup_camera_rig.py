@@ -1,23 +1,24 @@
 """
 03_setup_camera_rig.py
 ------------------------
-Turns the rig measurements in config.yaml (radius / camera height / target
-height / the 8 shooting angles) into a full camera projection matrix P for
+Turns the rig measurements in config.yaml (radius, camera height, target
+height and the shooting angles) into a full camera projection matrix P for
 every photo, and saves them to output/<version>/cameras.json.
 
-This is the step that encodes WHERE each of your 8 photos was taken from.
-It assumes the "orbit rig" capture method described in the README: you
-(or 8 fixed cameras) shot from 8 roughly evenly-spaced angles around the
-subject, all at the same distance and height, all aimed at the same point
-on the subject's body.
+This is the step that encodes where each photo was taken from. It assumes
+the "orbit rig" capture method described in the README: a camera (or several
+fixed cameras) shot from evenly-spaced angles around the subject, all at the
+same distance and height, all aimed at the same point on the subject's body.
 
-This is a FALLBACK. If camera_calibration/ has produced a cameras.json for
-this version, that file holds the real measured camera poses and this script
-leaves it alone - an idealised ring from typed-in numbers is strictly worse
-than a calibration. Run camera_calibration/ and you never need this script.
+This is a fallback. If camera_calibration/ has already produced a
+cameras.json for this version, that file holds the real measured camera
+poses and this script leaves it alone: an idealised ring built from typed-in
+numbers is always less accurate than a real calibration. Running
+camera_calibration/ removes the need for this script entirely.
 
-Run this once per version (full_body / waist_down) since they typically
-use different radius/height (waist_down is usually shot closer / lower).
+Run this once per version (full_body / waist_down), since they typically use
+different radius and height values (waist_down is usually shot closer and
+lower).
 """
 
 import glob
@@ -141,10 +142,10 @@ def main():
             json.dump(cameras, f, indent=2)
         print(f"  saved {len(cameras)} camera matrices -> {out_path}")
 
-    print("\nDone. IMPORTANT: cam_00, cam_01, ... map to your photos in the ORDER "
-          "you listed angles_deg in config.yaml AND the alphabetical order of your "
-          "image filenames within each pose folder (see README naming convention, "
-          "e.g. 01.jpg = 0deg, 02.jpg = 45deg, etc).")
+    print("\nDone. cam_00, cam_01, ... map to your photos in the order you listed "
+          "angles_deg in config.yaml, matched to the alphabetical order of the "
+          "image filenames within each pose folder (see the README naming "
+          "convention, e.g. 01.jpg = 0deg, 02.jpg = 45deg, etc).")
 
 
 if __name__ == "__main__":

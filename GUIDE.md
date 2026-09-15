@@ -17,14 +17,15 @@ This Proof of Concept demonstrates how Kinefeet 2.0 could modernize diabetic foo
 ## Table of Contents
 
 1. [Installation](#installation)
-2. [Camera Calibration](#camera-calibration)
-3. [Photo Capture](#photo-capture)
-4. [Configuration](#configuration)
-5. [Running the Pipeline](#running-the-pipeline)
-6. [Understanding Output](#understanding-output)
-7. [Mesh Generation](#mesh-generation)
-8. [Troubleshooting](#troubleshooting)
-9. [Advanced Topics](#advanced-topics)
+2. [Which pipeline should I use?](#which-pipeline-should-i-use)
+3. [Camera Calibration](#camera-calibration)
+4. [Photo Capture](#photo-capture)
+5. [Configuration](#configuration)
+6. [Running the Pipeline](#running-the-pipeline)
+7. [Understanding Output](#understanding-output)
+8. [Mesh Generation](#mesh-generation)
+9. [Troubleshooting](#troubleshooting)
+10. [Advanced Topics](#advanced-topics)
 
 ---
 
@@ -840,10 +841,10 @@ If you're stuck:
 3. Verify config.yaml matches your actual setup
 4. Try with just one pose first
 5. Review this guide's troubleshooting section
-6. Check DEPENDENCIES.md for technical details
+6. See `camera_calibration/README.md` for calibration-specific issues
 
 Common mistakes:
-- Forgetting to activate virtual environment
+- Forgetting to activate the virtual environment
 - Wrong measurements in config.yaml
 - Photos not named in angle order
 - Subject moved between shots

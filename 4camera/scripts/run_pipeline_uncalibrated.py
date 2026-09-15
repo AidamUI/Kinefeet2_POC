@@ -58,7 +58,7 @@ def main():
     print("4-CAMERA PIPELINE - UNCALIBRATED (approximate rig)")
     print("=" * 70)
     print(
-        "\n[!] Camera positions are ASSUMED from config_4camera.yaml, not measured.\n"
+        "\n[!] Camera positions are assumed from config_4camera.yaml, not measured.\n"
         "    Every distance in the 3D output is only as accurate as those\n"
         "    typed-in radius/height numbers. For real accuracy, calibrate first\n"
         "    and use run_pipeline_calibrated.py instead - see\n"

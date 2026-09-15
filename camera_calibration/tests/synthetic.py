@@ -2,13 +2,14 @@
 synthetic.py
 ------------
 Renders the square-grid board with a known camera, so the detector and the
-calibration can be checked against ground truth rather than against the one set
-of photos they were developed on.
+calibration can be checked against ground truth instead of only against a
+fixed set of sample photos.
 
-The point is to be able to answer "is this tuned to those 40 images, or does it
-work?" with a number. Every threshold in squaregrid.py was chosen while looking
-at real data; nothing here was, so agreement between the two is evidence and
-disagreement is a bug.
+Detector thresholds tuned only against sample photos risk working only on
+those photos. Nothing in this module is tuned against the real sample data,
+so agreement between the detector's output and the rendered ground truth is
+meaningful evidence that it generalises, and disagreement points to a real
+bug rather than an unlucky photo.
 """
 
 from __future__ import annotations

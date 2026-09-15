@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-Generate body mesh directly from MediaPipe landmarks without SMPL.
-This approach works WITH MediaPipe's 33-landmark structure instead of against it.
+Generate body mesh directly from MediaPipe landmarks without SMPL-X.
+This approach works with MediaPipe's 33-landmark structure instead of
+converting it to a different joint system first.
 
 Strategy:
 1. Use MediaPipe's 33 landmarks as-is (no conversion needed)

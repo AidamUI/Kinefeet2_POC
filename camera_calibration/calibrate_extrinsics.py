@@ -20,14 +20,9 @@ How it works
 
     Scale is metric and comes for free, because the board's 90 mm pitch is a
     measured physical quantity. Nothing here is guessed from a tape measure of
-    the rig.
-
-Why this replaces what was here before
-    The old pipeline never calibrated extrinsics at all - 03_setup_camera_rig.py
-    *synthesised* a perfect ring of cameras from hand-typed radius and height
-    numbers in config.yaml. Any difference between those numbers and where the
-    cameras really were went straight into the triangulated skeleton, and no
-    amount of care elsewhere could recover it.
+    the rig, which is why this is more accurate than an assumed camera ring
+    built from typed-in radius and height numbers: any error in those numbers
+    would go straight into the triangulated skeleton with nothing to catch it.
 """
 
 from __future__ import annotations

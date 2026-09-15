@@ -5,9 +5,9 @@ The core step: combines the 2D MediaPipe landmarks (script 02) with the
 camera projection matrices (script 03) to triangulate a 3D XYZ position
 for every joint, for every pose, for both versions.
 
-For each landmark index (e.g. "left_knee"), we gather its 2D pixel
+For each landmark index (e.g. "left_knee"), this gathers its 2D pixel
 position from every photo where it was detected with decent confidence,
-then run multi-view DLT triangulation (see utils.triangulate_point_dlt)
+then runs multi-view DLT triangulation (see utils.triangulate_point_dlt)
 to find the 3D point that best explains all those 2D observations at
 once.
 
@@ -59,10 +59,10 @@ def effective_projection_matrices(cameras_in_order, records, max_aspect_drift=0.
     cameras.json carries K/R/t (not just the baked P) precisely so this can be
     corrected: a resolution change is just a diagonal scale of K.
 
-    A *cropped* photo cannot be corrected this way - cropping moves the
-    principal point by an amount nobody recorded - so this only rescales when
+    A cropped photo cannot be corrected this way, because cropping moves the
+    principal point by an amount nobody recorded. So this only rescales when
     the aspect ratio still matches (same framing, different pixel count) and
-    otherwise falls back to the camera's own P unchanged, exactly as before.
+    otherwise falls back to the camera's own P unchanged.
     """
     warned = set()
     matrices = []

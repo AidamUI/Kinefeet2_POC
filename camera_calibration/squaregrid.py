@@ -4,9 +4,9 @@ squaregrid.py
 Detector and geometric model for the Captury colour square-grid calibration
 target (``squaregrid_color_60x40cm``).
 
-THE TARGET IS NOT A CHESSBOARD. It is a grid of *isolated* filled squares on a
-white field, so ``cv2.findChessboardCorners`` / ``findCirclesGrid`` /
-``aruco`` can never detect it. Geometry, read straight out of the shipped PDF:
+The target is not a chessboard. It is a grid of isolated filled squares on a
+white field, so ``cv2.findChessboardCorners``, ``findCirclesGrid`` and the
+``aruco`` detectors cannot find it. Geometry, read from the shipped PDF:
 
     page ................ 400 mm x 600 mm  (held landscape -> 600 x 400)
     grid ................ 6 columns x 4 rows of squares

@@ -55,19 +55,17 @@ def load_3d_joints(joints_file):
 def effective_projection_matrix(cam_data, photo_width, photo_height, max_aspect_drift=0.03):
     """This camera's P, rescaled to the resolution the photo actually is.
 
-    cameras.json's K is tied to one exact frame geometry - fx/fy scale with
-    resolution, cx/cy are pixel coordinates in that specific frame. Comparing
-    its raw P against 2D keypoints measured in a different photo resolution
-    (a different export tool, a codec rounding dimensions to a multiple of 2 or
-    16) makes this verification measure that resolution mismatch instead of the
-    reconstruction's real accuracy - every reported error inflated by roughly
-    the resolution ratio, which reads as "camera calibration isn't working"
-    when the 3D reconstruction itself (see scripts/04_triangulate_3d.py, which
-    already corrects for exactly this) may be fine.
+    cameras.json's K is tied to one exact frame geometry: fx and fy scale with
+    resolution, and cx and cy are pixel coordinates in that specific frame.
+    Comparing its raw P against 2D keypoints measured in a different photo
+    resolution (a different export tool, or a codec that rounds dimensions to
+    a multiple of 2 or 16) would make this verification measure that
+    resolution mismatch instead of the reconstruction's real accuracy, with
+    every reported error inflated by roughly the resolution ratio.
 
-    Mirrors 04_triangulate_3d.py's effective_projection_matrices - duplicated
-    rather than imported because module names starting with a digit aren't
-    importable with a plain ``import`` statement.
+    Mirrors 04_triangulate_3d.py's effective_projection_matrices function.
+    Duplicated rather than imported because module names starting with a
+    digit are not importable with a plain ``import`` statement.
     """
     calib_w, calib_h = cam_data.get("image_width"), cam_data.get("image_height")
     if not (calib_w and calib_h) or (photo_width, photo_height) == (calib_w, calib_h):

@@ -1,26 +1,27 @@
 """
 run_pipeline_calibrated.py
 ---------------------------
-Runs the 4-camera pipeline using a REAL camera calibration - the intended way
-to run this project.
+Runs the 4-camera pipeline using a real camera calibration. This is the
+recommended way to run the project.
 
     cd 4camera/scripts
     python run_pipeline_calibrated.py
 
-Prerequisite: camera_calibration/ has already produced 4camera/output/<version>/
-cameras.json for every version you have photos for (see
-camera_calibration/README.md):
+Prerequisite: camera_calibration/ has already produced
+4camera/output/<version>/cameras.json for every version you have photos for
+(see camera_calibration/README.md):
 
     cd camera_calibration
     python calibrate_intrinsics.py
     python calibrate_extrinsics.py
     python export_cameras.py
 
-This script does NOT run 03_setup_camera_rig.py - there is nothing for it to
-do. cameras.json already holds the real measured camera positions, matched
-to the actual capture frame size, with real lens distortion. Building a
-synthetic ring on top of that would be a downgrade, not a setup step (see
-run_pipeline_uncalibrated.py if that is genuinely what you want).
+This script does not run 03_setup_camera_rig.py, because there is nothing
+for it to do: cameras.json already holds the real measured camera
+positions, matched to the actual capture frame size, with real lens
+distortion. Building an approximate ring on top of that would be a downgrade
+rather than a setup step. See run_pipeline_uncalibrated.py if you want that
+approximate ring instead, for a quick preview before calibrating.
 
 Steps run, per version (full_body / waist_down) that has photos:
     1. 02_extract_2d_keypoints.py   MediaPipe 2D keypoints from the 4 photos

@@ -183,10 +183,10 @@ def _heal_stale_backup(path):
     mid-borrow: the real data/output/config.yaml sitting in
     ``<path>.pipeline_backup`` and a borrowed link or copy still live at
     ``path``. Nothing after that point can tell the two apart from a normal
-    first run, so check for it before ever taking a fresh backup - otherwise
-    the fresh backup collides with the stale one (a real crash this project
-    hit) or, worse, silently backs up the *borrowed* copy, burying the real
-    data/config.yaml under it for good.
+    first run, so this checks for a leftover backup before ever taking a
+    fresh one. Without this check, a fresh backup would collide with the
+    stale one, or silently back up the borrowed copy instead of the real
+    data, burying the original permanently.
     """
     backup = _backup_path(path)
     if not os.path.exists(backup):

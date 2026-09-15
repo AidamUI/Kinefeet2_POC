@@ -9,11 +9,12 @@ degrees, through the same numbered scripts 4camera/ uses.
 
 Note: uses config_8camera.yaml for configuration.
 
-Camera positions are ASSUMED from config_8camera.yaml (03_setup_camera_rig.py
-builds an approximate ring from typed-in radius/height/field-of-view numbers),
-not measured - there is no calibrated option for 8camera the way there is for
-4camera (see camera_calibration/README.md and 4camera/README.md). Every
-distance in the 3D output is only as accurate as those numbers.
+Camera positions are assumed from config_8camera.yaml, not measured:
+03_setup_camera_rig.py builds an approximate ring from typed-in
+radius/height/field-of-view numbers. There is no calibrated option for
+8camera the way there is for 4camera (see camera_calibration/README.md and
+4camera/README.md). Every distance in the 3D output is only as accurate as
+those numbers.
 
 Steps run, per version (full_body / waist_down) that has photos:
     1. 02_extract_2d_keypoints.py   MediaPipe 2D keypoints from the 8 photos
@@ -47,7 +48,7 @@ def main():
     print("8-CAMERA PIPELINE FOR KINEFEET 2.0")
     print("=" * 70)
     print(
-        "\n[!] Camera positions are ASSUMED from config_8camera.yaml, not measured.\n"
+        "\n[!] Camera positions are assumed from config_8camera.yaml, not measured.\n"
         "    Every distance in the 3D output is only as accurate as those\n"
         "    typed-in radius/height numbers."
     )

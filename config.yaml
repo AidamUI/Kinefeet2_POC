@@ -1,29 +1,34 @@
 # =============================================================================
-# config_4camera.yaml - Configuration for 4-camera setup
+# Configuration for the generic root pipeline (scripts/run_pipeline.py)
 # =============================================================================
-# This configuration is optimized for a 4-camera setup at 90-degree intervals
-# (0°, 90°, 180°, 270°) instead of the standard 8-camera setup.
+# Most users should use 4camera/ or 8camera/ instead, which come with their
+# own configuration already set up for that camera count. Use this file only
+# if your rig does not match either of those (a different number of cameras,
+# or angles that are not evenly spaced).
+#
+# The values below are a working example: 4 cameras at 90-degree intervals.
+# Edit angles_deg, radius_m, camera_height_m and target_height_m to match
+# your actual rig measurements before running the pipeline.
 
 camera:
   # Fallback only, used when camera_calibration/ has not produced a
-  # cameras.json yet. A real calibration overrides this entirely.
-  # Most phone main
-  # cameras (not the ultra-wide or telephoto lens) are roughly 60-75 deg
-  # horizontal field of view.
+  # cameras.json yet. A real calibration overrides this entirely. Most phone
+  # main cameras (not the ultra-wide or telephoto lens) are roughly 60-75
+  # degrees horizontal field of view.
   assumed_fov_deg: 65
 
 rig:
-  # ---- FULL BODY capture with 4 cameras ----
+  # ---- Full body capture ----
   # angles_deg: the shooting angle of each photo, in the order your photo
   # filenames sort alphabetically (01.jpg, 02.jpg, 03.jpg, 04.jpg = 0, 90, 180, 270 deg).
   full_body:
     angles_deg: [0, 90, 180, 270]
     radius_m: 2.5          # distance from camera to the subject's center line
     camera_height_m: 1.1   # height of the camera lens off the floor
-    target_height_m: 0.9   # height on the subject the camera was aimed at (~navel)
+    target_height_m: 0.9   # height on the subject the camera was aimed at (near the navel)
 
-  # ---- WAIST-DOWN capture with 4 cameras ----
-  # Typically shot closer and lower since you're only framing hips-to-feet.
+  # ---- Waist-down capture ----
+  # Typically shot closer and lower, since only hips to feet are in frame.
   waist_down:
     angles_deg: [0, 90, 180, 270]
     radius_m: 1.5
@@ -32,10 +37,10 @@ rig:
 
 triangulation:
   # A landmark is only used from a photo if MediaPipe's visibility score
-  # for it is at least this. Visibility ~0-1, where MediaPipe is unsure
-  # about occluded/out-of-frame joints.
+  # for it is at least this. Visibility ranges from 0 to 1, with low values
+  # meaning MediaPipe is unsure about an occluded or out-of-frame joint.
   min_visibility: 0.1
-  # A landmark needs at least this many usable photos to be triangulated
-  # at all. With 4 cameras, we need at least 2 views (mathematical minimum).
-  # 3 is more robust but may exclude some joints.
+  # A landmark needs at least this many usable photos to be triangulated at
+  # all. Two is the mathematical minimum for triangulation; a higher value
+  # is more robust but may exclude some joints.
   min_views: 2

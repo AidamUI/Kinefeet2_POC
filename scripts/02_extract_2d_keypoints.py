@@ -34,8 +34,8 @@ DATA_ROOT = os.path.join(os.path.dirname(__file__), "..", "data")
 OUTPUT_ROOT = os.path.join(os.path.dirname(__file__), "..", "output")
 MODEL_DIR = os.path.join(os.path.dirname(__file__), "..", "models")
 
-# "lite" / "full" / "heavy" - heavy is the most accurate and is fine here
-# since we're processing photos offline, not doing realtime video.
+# "lite" / "full" / "heavy" - heavy is the most accurate and is fine here,
+# since photos are processed offline rather than in realtime video.
 MODEL_VARIANT = "heavy"
 MODEL_URL = (
     f"https://storage.googleapis.com/mediapipe-models/pose_landmarker/"

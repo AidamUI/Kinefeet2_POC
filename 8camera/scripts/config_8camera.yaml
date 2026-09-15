@@ -1,29 +1,29 @@
 # =============================================================================
-# config_4camera.yaml - Configuration for 4-camera setup
+# config_8camera.yaml - configuration for the 8-camera setup
 # =============================================================================
-# This configuration is optimized for a 4-camera setup at 90-degree intervals
-# (0°, 90°, 180°, 270°) instead of the standard 8-camera setup.
+# Used by run_pipeline_8camera.py to build an approximate camera ring at
+# 45-degree intervals (0, 45, 90, 135, 180, 225, 270, 315 degrees). There is
+# no calibrated alternative for 8camera yet; see 8camera/README.md.
 
 camera:
   # Fallback only, used when camera_calibration/ has not produced a
-  # cameras.json yet. A real calibration overrides this entirely.
-  # Most phone main
-  # cameras (not the ultra-wide or telephoto lens) are roughly 60-75 deg
-  # horizontal field of view.
+  # cameras.json yet. A real calibration overrides this entirely. Most phone
+  # main cameras (not the ultra-wide or telephoto lens) are roughly 60-75
+  # deg horizontal field of view.
   assumed_fov_deg: 65
 
 rig:
-  # ---- FULL BODY capture with 8 cameras ----
+  # ---- Full body capture with 8 cameras ----
   # angles_deg: the shooting angle of each photo, in the order your photo
   # filenames sort alphabetically (01.jpg through 08.jpg = 0, 45, 90, 135, 180, 225, 270, 315 deg).
   full_body:
     angles_deg: [0, 45, 90, 135, 180, 225, 270, 315]
     radius_m: 2.5          # distance from camera to the subject's center line
     camera_height_m: 1.1   # height of the camera lens off the floor
-    target_height_m: 0.9   # height on the subject the camera was aimed at (~navel)
+    target_height_m: 0.9   # height on the subject the camera was aimed at (near the navel)
 
-  # ---- WAIST-DOWN capture with 8 cameras ----
-  # Typically shot closer and lower since you're only framing hips-to-feet.
+  # ---- Waist-down capture with 8 cameras ----
+  # Typically shot closer and lower, since only hips to feet are in frame.
   waist_down:
     angles_deg: [0, 45, 90, 135, 180, 225, 270, 315]
     radius_m: 1.5
@@ -32,9 +32,9 @@ rig:
 
 triangulation:
   # A landmark is only used from a photo if MediaPipe's visibility score
-  # for it is at least this. Visibility ~0-1, where MediaPipe is unsure
-  # about occluded/out-of-frame joints.
+  # for it is at least this. Visibility ranges from 0 to 1, with low values
+  # meaning MediaPipe is unsure about an occluded or out-of-frame joint.
   min_visibility: 0.1
-  # A landmark needs at least this many usable photos to be triangulated
-  # at all. With 8 cameras, we use 3 views for good reliability.
+  # A landmark needs at least this many usable photos to be triangulated at
+  # all. With 8 cameras, 3 views gives good reliability.
   min_views: 3
