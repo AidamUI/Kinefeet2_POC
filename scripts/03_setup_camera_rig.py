@@ -11,9 +11,10 @@ It assumes the "orbit rig" capture method described in the README: you
 subject, all at the same distance and height, all aimed at the same point
 on the subject's body.
 
-If you calibrated your camera with 01_calibrate_camera.py, that K and
-lens distortion are reused for every camera here (same physical camera).
-Otherwise an approximate K is built from a guessed field-of-view.
+This is a FALLBACK. If camera_calibration/ has produced a cameras.json for
+this version, that file holds the real measured camera poses and this script
+leaves it alone - an idealised ring from typed-in numbers is strictly worse
+than a calibration. Run camera_calibration/ and you never need this script.
 
 Run this once per version (full_body / waist_down) since they typically
 use different radius/height (waist_down is usually shot closer / lower).
@@ -33,12 +34,36 @@ from utils import build_intrinsics, build_extrinsics, projection_matrix
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), "..", "config.yaml")
 DATA_ROOT = os.path.join(os.path.dirname(__file__), "..", "data")
 OUTPUT_ROOT = os.path.join(os.path.dirname(__file__), "..", "output")
-INTRINSICS_PATH = os.path.join(OUTPUT_ROOT, "camera_intrinsics.json")
+
+
+CALIBRATED_MARKER = "camera_calibration/export_cameras.py"
 
 
 def load_config():
     with open(CONFIG_PATH) as f:
         return yaml.safe_load(f)
+
+
+def is_calibrated(path):
+    """True if this cameras.json came from a real calibration.
+
+    The poses this script builds are an idealised ring derived from numbers
+    typed into config.yaml - a placeholder for when nothing better exists. Once
+    camera_calibration/ has measured where the cameras actually are, silently
+    overwriting that with the placeholder would undo the calibration and leave
+    no trace, so refuse instead.
+    """
+    if not os.path.exists(path):
+        return False
+    try:
+        with open(path) as f:
+            cameras = json.load(f)
+        return any(
+            isinstance(cam, dict) and cam.get("source") == CALIBRATED_MARKER
+            for cam in cameras.values()
+        )
+    except (ValueError, OSError, AttributeError):
+        return False
 
 
 def get_image_size(version, pose_name):
@@ -57,20 +82,11 @@ def get_image_size(version, pose_name):
 
 
 def build_K(cfg, image_width, image_height):
-    if os.path.exists(INTRINSICS_PATH):
-        with open(INTRINSICS_PATH) as f:
-            calib = json.load(f)
-        print("  using checkerboard-calibrated intrinsics from "
-              "output/camera_intrinsics.json")
-        # NOTE: if your body photos were taken at a different resolution
-        # than the calibration photos, scale K's focal length / center
-        # accordingly. This assumes the same resolution for simplicity.
-        return calib["K"]
-    else:
-        print("  no checkerboard calibration found - using approximate "
-              "field-of-view intrinsics (see config.yaml -> camera.assumed_fov_deg)")
-        K = build_intrinsics(image_width, image_height, cfg["camera"]["assumed_fov_deg"])
-        return K.tolist()
+    print("  no real calibration for this rig - using approximate "
+          "field-of-view intrinsics (see config.yaml -> camera.assumed_fov_deg).\n"
+          "  Run camera_calibration/ for a real K; see its README.")
+    K = build_intrinsics(image_width, image_height, cfg["camera"]["assumed_fov_deg"])
+    return K.tolist()
 
 
 def main():
@@ -115,6 +131,12 @@ def main():
 
         os.makedirs(os.path.join(OUTPUT_ROOT, version), exist_ok=True)
         out_path = os.path.join(OUTPUT_ROOT, version, "cameras.json")
+        if is_calibrated(out_path):
+            print(f"  cameras.json here came from camera_calibration/ - keeping it.")
+            print(f"    These are the real measured camera poses; the idealised ring")
+            print(f"    this script builds from config.yaml would be a downgrade.")
+            print(f"    Delete {out_path} first if you really want to replace it.")
+            continue
         with open(out_path, "w") as f:
             json.dump(cameras, f, indent=2)
         print(f"  saved {len(cameras)} camera matrices -> {out_path}")

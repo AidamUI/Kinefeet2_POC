@@ -1,0 +1,113 @@
+# =============================================================================
+# Camera calibration - Kinefeet 2.0
+# =============================================================================
+# Target: Captury colour square-grid board (squaregrid_color_60x40cm).
+# Its geometry is fixed by the printed PDF and lives in squaregrid.py - do not
+# put pattern dimensions here, there is nothing to tune.
+#
+# Pipeline:
+#   1. calibrate_intrinsics.py   K + distortion, per camera
+#   2. calibrate_extrinsics.py   where each camera is, in a shared world frame
+#   3. export_cameras.py         writes cameras.json for the Kinefeet pipeline
+# =============================================================================
+
+detection:
+  # Minimum squares that must be located for a view to count (out of 24).
+  # Partial boards are fine and useful - views where the board runs off the
+  # frame edge are exactly the ones that pin down lens distortion.
+  min_squares: 12
+
+  # Use all 4 corners of every square (up to 96 points/view) instead of the 24
+  # centres. Both give the same answer within uncertainty; centres are the
+  # safer default because a centre is the intersection of the square's
+  # diagonals, which averages down the noise of its four corners, and because
+  # corner refinement gives up on distant boards where squares are only a few
+  # pixels across.
+  use_square_corners: false
+
+# Which lens-distortion terms to solve for.
+# Cross-validated on the shipped sample set: k1, k2, p1, p2 generalises best.
+# Adding k3 makes the radial terms wildly unstable unless the board actually
+# reaches the image corners in several views.
+distortion:
+  tangential: true          # p1, p2 - sensor not parallel to lens
+  k3: false                 # 3rd radial term
+  rational: false           # k4..k6, for strong wide-angle / fisheye-ish lenses
+  thin_prism: false         # s1..s4, rarely needed
+  fix_aspect_ratio: false   # force fx == fy
+  fix_principal_point: false
+
+# Flatness screen, in pixels. Each view is first fitted with a single
+# homography: the board is planar, so anything left over is a bowed board, a
+# blurred frame, or rolling-shutter tearing. Views above this are dropped
+# before calibration rather than being allowed to bias it.
+max_planar_residual_px: 1.5
+
+# After calibration, views whose reprojection error exceeds this many times the
+# median get dropped and the calibration is re-run.
+outlier_factor: 3.0
+
+# -----------------------------------------------------------------------------
+# Stage 1: intrinsics. One folder of board photos per physical camera.
+#
+# If all cameras are the same model with the same lens and zoom, calibrating
+# one and reusing it is acceptable - list the single folder here and set
+# `share_intrinsics` under `extrinsics` below.
+# -----------------------------------------------------------------------------
+intrinsics:
+  sources:
+    single_camera: data/intrinsic/single_camera
+
+# -----------------------------------------------------------------------------
+# Stage 2: extrinsics. One folder per board placement, holding one synchronised
+# image from every camera. The board must be visible to all cameras in a given
+# placement, and must not move between them.
+#
+# Several placements (move the board around the capture volume between them)
+# make the solve much better conditioned than a single one.
+# -----------------------------------------------------------------------------
+extrinsics:
+  # Folders of synchronised views, one per board placement.
+  positions:
+    - data/extrinsic/position_01
+
+  # Camera order *within each placement folder*, matched to the alphabetical
+  # order of the files in it. These names become the keys in cameras.json and
+  # must line up with the order of your capture photos (01.png .. 04.png).
+  cameras: [cam01, cam02, cam03, cam04]
+
+  # Intrinsics to use for each camera: a name from `intrinsics.sources` above.
+  # `share_intrinsics` gives every camera the same one.
+  share_intrinsics: single_camera
+  # per_camera_intrinsics:
+  #   cam01: cam01
+  #   cam02: cam02
+
+  # World frame origin: the board's first placement.
+  #   z_up      - +Z points up out of the floor. Use this when the board was
+  #               laid flat on the floor; it matches what the Kinefeet
+  #               triangulation and mesh code expect.
+  #   board     - raw board frame (+Z out of the printed face).
+  world_frame: z_up
+
+  # Refine all camera poses (and, optionally, board poses) by minimising total
+  # reprojection error across every camera and placement at once.
+  bundle_adjust: true
+  # Let bundle adjustment also nudge the focal lengths. Only worth enabling
+  # when you have several well-spread board placements.
+  refine_focal: false
+
+# -----------------------------------------------------------------------------
+# Stage 3: export. Where cameras.json goes, and which capture folder each one
+# describes. The capture folder is checked against the calibration: K belongs to
+# one exact frame geometry, so photos that were cropped or rescaled after
+# capture cannot use it.
+# -----------------------------------------------------------------------------
+export:
+  targets:
+    - name: 4camera / full_body
+      path: ../4camera/output/full_body/cameras.json
+      capture_dir: ../4camera/data/full_body
+    - name: 4camera / waist_down
+      path: ../4camera/output/waist_down/cameras.json
+      capture_dir: ../4camera/data/waist_down

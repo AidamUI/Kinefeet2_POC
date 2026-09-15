@@ -154,7 +154,7 @@ Single photos can't capture depth. By using 8 cameras positioned around the subj
 Your results depend on:
 1. **Subject stillness** - Any movement between shots causes errors (biggest factor)
 2. **Measurement accuracy** - Precise rig geometry improves results
-3. **Camera calibration** - Optional but recommended for best accuracy
+3. **Camera calibration** - Required; see camera_calibration/
 4. **Lighting quality** - Even lighting helps MediaPipe detection
 
 ## Project Structure
@@ -178,7 +178,6 @@ mp3d/
 │       ├── pose2/
 │       └── pose3/
 ├── scripts/
-│   ├── 01_calibrate_camera.py
 │   ├── 02_extract_2d_keypoints.py
 │   ├── 03_setup_camera_rig.py
 │   ├── 04_triangulate_3d.py
@@ -246,7 +245,7 @@ After running the pipeline, check:
 - Subject moved between shots
 - Rig measurements in config.yaml don't match reality
 - Camera angles not evenly spaced
-- Run camera calibration (see GUIDE.md)
+- Run camera calibration (see camera_calibration/README.md)
 
 **Distorted 3D model**
 - Photo filenames don't sort in same order as angles
@@ -260,11 +259,15 @@ After running the pipeline, check:
 ## Advanced Features
 
 ### Camera Calibration
-For best accuracy, calibrate your camera once:
+Required, not optional - it is what makes the 3D output metric. Uses the Captury
+colour square-grid board, not a checkerboard:
 ```bash
-python scripts/01_calibrate_camera.py
+cd camera_calibration
+python calibrate_intrinsics.py     # focal length, principal point, distortion
+python calibrate_extrinsics.py     # where the cameras are, in one world frame
+python export_cameras.py           # -> <rig>/output/<version>/cameras.json
 ```
-See GUIDE.md for details.
+See [camera_calibration/README.md](camera_calibration/README.md).
 
 ### Mesh Generation
 Two approaches available:

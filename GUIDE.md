@@ -75,42 +75,64 @@ If this shows help text, installation succeeded.
 
 ## Camera Calibration
 
-Camera calibration is optional but highly recommended for accuracy. Do this once per camera/lens/zoom combination.
+Calibration is **required**, not optional. It is what turns pixel coordinates
+into metric 3D positions, and it lives in its own folder: see
+[`camera_calibration/README.md`](camera_calibration/README.md).
 
-### Why Calibrate?
+### Why calibrate?
 
-Calibration determines your camera's exact focal length and lens distortion, which significantly improves 3D reconstruction accuracy.
+Two separate things have to be measured.
+
+**Intrinsics** are each camera's focal length, principal point and lens
+distortion. **Extrinsics** are where the cameras are relative to each other.
+Triangulation needs both, and neither can be guessed: the pipeline used to
+synthesise extrinsics from hand-typed radius and height numbers in
+`config.yaml`, and every millimetre those numbers were wrong went straight into
+the output.
 
 ### Steps
 
-1. **Print checkerboard pattern**
-   - Search "opencv checkerboard 9x6" and print on A4/Letter paper
-   - Tape to flat cardboard to keep it rigid
-   - Measure one square's size in mm (typically 25mm)
+The target is the Captury colour square-grid board
+(`squaregrid_color_60x40cm-recommended.pdf`), **not** a checkerboard. Print it at
+exactly 100% scale and mount it on something rigid and flat.
 
-2. **Update square size** (if not 25mm)
-   
-   Edit `scripts/01_calibrate_camera.py`:
-   ```python
-   SQUARE_SIZE_MM = 25  # Change to your measured size
-   ```
+1. **Intrinsics** - 15-25 photos per camera, straight out of the camera at its
+   native resolution. Vary the angle hard and push the board into the frame
+   corners in several shots. Put them in
+   `camera_calibration/data/intrinsic/<camera>/`.
 
-3. **Take calibration photos**
-   - Use the EXACT camera/phone/zoom you'll use for body photos
-   - Take 12-20 photos of the checkerboard
-   - Vary angles, distances, and tilts
-   - Keep entire board in frame
-   - Save to `data/calibration_images/`
-
-4. **Run calibration**
    ```bash
-   python scripts/01_calibrate_camera.py
+   cd camera_calibration
+   python calibrate_intrinsics.py --debug
    ```
 
-5. **Check results**
-   - Reprojection error should be < 1.5 pixels
-   - Creates `output/camera_intrinsics.json`
-   - Pipeline automatically uses this file if present
+2. **Extrinsics** - place the board where all cameras see it and capture every
+   camera at the same instant, one image per camera, into
+   `camera_calibration/data/extrinsic/position_01/`. Repeat for 4-8 placements
+   around the capture volume (`position_02`, `position_03`, ...).
+
+   ```bash
+   python calibrate_extrinsics.py --debug
+   ```
+
+3. **Export** to the pipeline:
+
+   ```bash
+   python export_cameras.py
+   ```
+
+4. **Check the numbers it prints**
+   - intrinsic RMS under ~1 px
+   - extrinsic RMS under ~1 px
+   - the triangulation check against the physical board, in millimetres - this
+     is the one that tells you whether the cameras are really where the solve
+     says they are
+   - camera positions and baselines that match the room you shot in
+
+**Shoot every photo straight from the camera.** Screenshots of a video window
+are cropped and rescaled by whatever size the window happened to be, and
+intrinsics measured on them describe no real camera. Use the same resolution,
+zoom and lens for calibration and for capture.
 
 ---
 
