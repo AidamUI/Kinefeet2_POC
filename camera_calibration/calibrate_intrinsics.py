@@ -10,6 +10,13 @@ photos of the Captury square-grid board, using ``cv2.calibrateCamera``.
 
 Writes ``output/intrinsics/<camera>.json``.
 
+With ``--debug``, also writes one annotated image per view to
+``output/debug/<camera>/``: the detected board (colour-coded squares) with a
+reprojection overlay on top - green circles are where the detector found
+each point, red crosses are where the fitted camera model predicts that
+point should be, and the header reports that view's RMS error. Tight overlap
+between the circles and crosses is what a good calibration looks like.
+
 What it does beyond a textbook calibrateCamera call:
   * refuses to mix image sizes (see common.check_image_sizes for why)
   * runs a second pass after dropping views whose reprojection error is a
@@ -214,19 +221,32 @@ def calibrate_camera(name, folder, cfg, debug=False):
     common.save_json(os.path.join(OUT_DIR, f"{name}.json"), result)
 
     if debug:
-        _write_debug(name, detections, paths)
+        _write_debug(name, detections, paths, obj_pts, img_pts, K, dist, rvecs, tvecs, errors)
     return result
 
 
-def _write_debug(name, detections, paths):
+def _write_debug(name, detections, paths, obj_pts, img_pts, K, dist, rvecs, tvecs, errors):
+    """Write one annotated image per view: the detected board (colour-coded
+    squares) plus a reprojection overlay showing exactly how well the fitted
+    K/distortion explain that view - green circles are the detected points,
+    red crosses are where the model predicts they should be, and the yellow
+    lines between them are the per-point error.
+    """
     out = os.path.join(common.HERE, "output", "debug", name)
     os.makedirs(out, exist_ok=True)
-    for detection, path in zip(detections, paths):
+    for detection, path, obj, img, rvec, tvec, rms in zip(
+        detections, paths, obj_pts, img_pts, rvecs, tvecs, errors
+    ):
         image = cv2.imread(path)
         if image is None:
             continue
-        cv2.imwrite(os.path.join(out, os.path.basename(path)), sg.draw(image, detection))
-    print(f"  annotated detections -> {os.path.relpath(out, common.HERE)}")
+        annotated = sg.draw(image, detection)
+        projected, _ = cv2.projectPoints(obj, rvec, tvec, K, dist)
+        header = [f"{name}  {os.path.basename(path)}", f"reprojection RMS {rms:.3f} px"]
+        annotated = common.draw_reprojection(annotated, img.reshape(-1, 2),
+                                              projected.reshape(-1, 2), header)
+        cv2.imwrite(os.path.join(out, os.path.basename(path)), annotated)
+    print(f"  annotated detections + reprojection -> {os.path.relpath(out, common.HERE)}")
 
 
 def main():

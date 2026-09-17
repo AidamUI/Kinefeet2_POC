@@ -259,6 +259,38 @@ def rescale_intrinsics(K, calib_size, image_size):
     return out, (sx, sy)
 
 
+def draw_reprojection(image, observed, projected, header_lines):
+    """Overlay observed vs. reprojected points on an image, so calibration
+    accuracy can be checked by eye instead of by reading numbers out of JSON.
+
+    Green circles are where the board detector actually found each point;
+    red crosses are where the fitted camera model predicts that same point
+    should land; the yellow line between them is the reprojection error for
+    that point. ``header_lines`` (a list of strings, e.g. camera name and
+    RMS/max error) is drawn as a text panel in the top-left corner.
+    """
+    out = image.copy()
+    for (ox, oy), (px, py) in zip(observed, projected):
+        o = (int(round(ox)), int(round(oy)))
+        p = (int(round(px)), int(round(py)))
+        cv2.line(out, o, p, (0, 255, 255), 1, cv2.LINE_AA)
+        cv2.circle(out, o, 6, (0, 255, 0), 2, cv2.LINE_AA)
+        cv2.drawMarker(out, p, (0, 0, 255), cv2.MARKER_CROSS, 10, 2, cv2.LINE_AA)
+
+    if header_lines:
+        pad, line_h = 10, 24
+        box_w = max(260, 12 * max(len(line) for line in header_lines))
+        box_h = pad * 2 + line_h * len(header_lines)
+        overlay = out.copy()
+        cv2.rectangle(overlay, (0, 0), (box_w, box_h), (0, 0, 0), -1)
+        cv2.addWeighted(overlay, 0.6, out, 0.4, 0, out)
+        for i, line in enumerate(header_lines):
+            y = pad + line_h * i + 18
+            cv2.putText(out, line, (pad, y), cv2.FONT_HERSHEY_SIMPLEX, 0.55,
+                        (255, 255, 255), 1, cv2.LINE_AA)
+    return out
+
+
 def save_json(path, payload):
     os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:

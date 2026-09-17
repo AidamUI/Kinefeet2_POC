@@ -9,10 +9,14 @@ python calibrate_extrinsics.py      # where each camera is, in one world frame
 python export_cameras.py            # writes cameras.json for the pipeline
 ```
 
-Add `--debug` to either calibration stage to write annotated images showing
-exactly which squares were found and how they were labelled. Check these the
-first time you run against new data. It takes ten seconds and catches most
-problems early.
+Add `--debug` to either calibration stage to write annotated images to
+`output/debug/`. Each image shows which squares were found and how they were
+labelled, plus a reprojection overlay: green circles are the detected
+points, red crosses are those same points reprojected through the fitted
+camera model, and the header reports that view's error in pixels. Tight
+overlap between circles and crosses is what a good calibration looks like;
+visible gaps mean something is off. Check these the first time you run
+against new data - it takes ten seconds and catches most problems early.
 
 ## The target
 
@@ -136,7 +140,7 @@ constant factor.
 ```
 output/intrinsics/<camera>.json    K, distortion, per-view errors, uncertainties
 output/extrinsics.json             R, t and camera positions in the world frame
-output/debug/                      annotated detections, with --debug
+output/debug/                      annotated detections + reprojection overlay, with --debug
 ```
 
 World frame (`world_frame: z_up`): origin at the corner square of the first
