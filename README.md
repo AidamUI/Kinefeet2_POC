@@ -3,14 +3,68 @@
 Proof of concept: diabetic foot assessment using computer vision and 3D
 reconstruction.
 
+## Kinefeet 1.0
+
+What it is: a web-based prototype for analysing foot kinematics during
+walking, built at Universitas Indonesia (Faculty of Medicine and Dr. Cipto
+Mangunkusumo National General Hospital, Jakarta). The published papers
+call it "KineFeet"; the name "Kinefeet 1.0" is this project's label for it,
+and the sources do not use it. [1][2]
+
+How it works:
+- Capture: two Microsoft Azure Kinect depth cameras, one behind and one
+  beside a treadmill, record 5 seconds at 30 fps. The patient wears red
+  socks with white 1 cm markers on bony landmarks. [1]
+- Analysis: the clinician uploads the video; the software detects the
+  markers, splits the stance phase automatically and reports joint angles
+  that can be exported. [1]
+- Measures: ankle inclination, medial longitudinal arch (MLA) angle and
+  first metatarsophalangeal (MTP1) angle during late stance. Ankle and
+  subtalar angles were dropped from the diagnostic study because they
+  differed significantly from manual measurements. [2]
+- Needs: Azure Kinect cameras, a treadmill, and a computer with at least
+  8 CPU cores, a GPU equal to or better than a GTX 1050, and 8 GB RAM. [1]
+
+Where it falls short (author-stated unless noted):
+- It measures joint angles during gait. It does not produce a 3D model of
+  the foot or lower limb.
+- The diagnostic study used 89 healthy adults aged 25 to 59. The authors
+  say this limits generalisation to patient groups, and call for studies in
+  gait pathologies. [2]
+- Results were compared with manual Kinovea measurements, not with a 3D
+  motion-capture system. [2]
+- The usability study had five physiatrists. It tested usability, not
+  accuracy. Gait-phase detection accuracy was 73.6%. Markers can be hidden
+  by the swinging opposite leg. [1]
+- The papers do not report diabetic-foot validation. One usability tester
+  was a non-neuropathic diabetic patient. [1]
+
+Sources: [1] Anestherita et al., Frontiers in Medical Technology, 2025,
+doi:10.3389/fmedt.2025.1677174. [2] Anestherita et al., Journal of Modern
+Rehabilitation, 2026, 20(1):47-55, doi:10.18502/jmr.v20i1.21025.
+
+### What Kinefeet 2.0 changes
+
+Kinefeet 2.0 is this proof of concept. It swaps the depth cameras, markers
+and treadmill for ordinary photographs from several calibrated cameras and
+reconstructs a 3D skeleton and body mesh by triangulation. What the PoC has
+shown: 23 of 23 landmarks reconstructed in 3 full-body poses from 4 views,
+and a lower reprojection error with calibration (3.9 to 5.2 px) than with
+assumed camera positions (18 to 26 px). What it has not shown: millimetre
+accuracy, arch or toe measurement, gait measurement, patient data, or any
+comparison with Kinefeet 1.0. It is also not a replacement for the gait
+angles above; it captures a still pose, not walking.
+
 ## Project Background
 
-Kinefeet is a diabetic foot assessment tool that helps healthcare providers
-monitor foot deformities and complications in diabetic patients. Traditional
-Kinefeet uses manual measurements and 2D photography, which can be
-time-consuming and subjective.
+Kinefeet is a foot assessment tool. This project is aimed at helping
+healthcare providers monitor foot deformities and complications in
+diabetic patients. The sources above describe Kinefeet 1.0 as a gait
+kinematics tool, not a diabetic-specific one, and the earlier claim here
+that it relied on manual measurements and 2D photography is not supported
+by them.
 
-This proof of concept modernizes diabetic foot assessment using multi-view
+This proof of concept modernizes foot assessment using multi-view
 3D reconstruction. By capturing photos from multiple angles and applying
 computer vision, it builds accurate 3D models of a patient's feet and lower
 body, enabling:
