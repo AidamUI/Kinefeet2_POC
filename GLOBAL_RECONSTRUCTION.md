@@ -52,8 +52,11 @@ and the file says so.
 
 ## Checking the results
 
-- Mesh files: `sequence/smplx/pose1.obj` ... open in Blender, MeshLab or any OBJ
-  viewer (Z up, metres, all poses share one world frame).
+- Quickest: `sequence/smplx_preview.png` (all poses, joints in red) and
+  `sequence/smplx_interactive.html` (rotate in a browser, click a pose in the legend
+  to hide it).
+- Mesh files: `sequence/smplx/pose1.obj` / `.ply` ... open in Blender or MeshLab
+  (Z up, metres, all poses share one world frame).
 - Everything together: `python -m rerun <rig>/<version>/sequence/kinefeet.rrd`.
 - Numbers: `smplx_fit.json` (joint error cm, reprojection px), `consistency.json`,
   `opensim/ik_report.json` (marker error cm, joint angles).

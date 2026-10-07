@@ -35,7 +35,9 @@ USAGE   python scripts/10_fit_smplx_sequence.py <rig_output_dir> [--version full
 INPUT   <rig_output_dir>/<version>/sequence/joints_world.npz   (script 09)
 OUTPUT  <rig_output_dir>/<version>/sequence/smplx_world.npz
             vertices (F, V, 3), faces, joints (F, 22, 3), betas, body_pose, ...
-        <rig_output_dir>/<version>/sequence/smplx/<pose>.obj
+        <rig_output_dir>/<version>/sequence/smplx/<pose>.obj and .ply
+        <rig_output_dir>/<version>/sequence/smplx_preview.png   all meshes, one image
+        <rig_output_dir>/<version>/sequence/smplx_interactive.html   rotate in any browser
         <rig_output_dir>/<version>/sequence/smplx_fit.json   (errors in cm)
         script 12 shows the meshes automatically if smplx_world.npz exists.
 """
@@ -217,6 +219,58 @@ def fit_sequence(model, target, weight, free_joints, kabsch, use_floor=True,
     }
 
 
+def render_preview(path, vertices, faces, target, frames, max_faces=7000):
+    """One image with every fitted mesh (blue) and its triangulated joints (red dots)."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+
+    sel = np.random.default_rng(0).choice(len(faces), min(max_faces, len(faces)), replace=False)
+    fig = plt.figure(figsize=(5 * len(frames), 6))
+    for f, pose in enumerate(frames):
+        ax = fig.add_subplot(1, len(frames), f + 1, projection="3d")
+        ax.add_collection3d(Poly3DCollection(vertices[f][faces[sel]], facecolor="lightsteelblue",
+                                             edgecolor="none"))
+        pts = target[f][~np.all(target[f] == 0, axis=1)]
+        ax.scatter(pts[:, 0], pts[:, 1], pts[:, 2], c="crimson", s=10)
+        mid = (vertices[f].max(0) + vertices[f].min(0)) / 2
+        r = max(1.0, float((vertices[f].max(0) - vertices[f].min(0)).max()) / 2 + 0.1)
+        ax.set_xlim(mid[0] - r, mid[0] + r)
+        ax.set_ylim(mid[1] - r, mid[1] + r)
+        ax.set_zlim(max(0.0, mid[2] - r), max(0.0, mid[2] - r) + 2 * r)
+        ax.view_init(elev=8, azim=-70)
+        ax.set_title(pose)
+        ax.set_xlabel("X (m)")
+        ax.set_ylabel("Y (m)")
+        ax.set_zlabel("Z (m)")
+    fig.tight_layout()
+    fig.savefig(path, dpi=110)
+    plt.close(fig)
+
+
+def render_interactive(path, vertices, faces, frames):
+    """Rotatable browser view with every fitted mesh in the shared world frame.
+
+    Click a pose name in the legend to show or hide it. Skipped if plotly is missing.
+    """
+    try:
+        import plotly.graph_objects as go
+    except ImportError:
+        print("  (plotly not installed - skipping smplx_interactive.html)")
+        return
+    colors = ["#5b8db8", "#d9822b", "#4f9d69", "#b05fa3", "#8c8c8c"]
+    fig = go.Figure()
+    for f, pose in enumerate(frames):
+        v = vertices[f]
+        fig.add_trace(go.Mesh3d(x=v[:, 0], y=v[:, 1], z=v[:, 2], i=faces[:, 0], j=faces[:, 1], k=faces[:, 2],
+                                color=colors[f % len(colors)], opacity=0.85, name=pose, showlegend=True,
+                                flatshading=False, lighting=dict(ambient=0.5, diffuse=0.8, roughness=0.6)))
+    fig.update_layout(title="SMPL-X meshes in the world frame (click a pose in the legend to hide it)",
+                      scene=dict(aspectmode="data", xaxis_title="X (m)", yaxis_title="Y (m)", zaxis_title="Z (m, up)"))
+    fig.write_html(path)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("rig_output_dir")
@@ -256,6 +310,9 @@ def main():
     os.makedirs(mesh_dir, exist_ok=True)
     for f, pose in enumerate(frames):
         s06.export_obj_mesh(os.path.join(mesh_dir, f"{pose}.obj"), res["vertices"][f], res["faces"])
+        s06.export_ply_mesh(os.path.join(mesh_dir, f"{pose}.ply"), res["vertices"][f], res["faces"])
+    render_preview(os.path.join(seq_dir, "smplx_preview.png"), res["vertices"], res["faces"], target, frames)
+    render_interactive(os.path.join(seq_dir, "smplx_interactive.html"), res["vertices"], res["faces"], frames)
     report = {
         "frames": frames, "gender": args.gender, "calibrated": calibrated,
         "shared_betas": [round(float(b), 4) for b in res["betas"]],

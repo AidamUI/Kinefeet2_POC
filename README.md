@@ -260,10 +260,13 @@ synchronized video: see `DEVELOPMENT.md`.
 1. Quick look, no software: open `preview.png` (skeleton) and
    `*_mediapipe_mesh_preview.png` (body mesh) in each pose folder.
 2. Rotate a mesh in the browser: open `*_mediapipe_mesh_interactive.html`.
-3. Fitted SMPL-X body: open `sequence/smplx/pose1.obj` (also pose2, pose3) in
-   Blender (free), MeshLab or any OBJ viewer. Z is up, units are metres, and the
-   meshes already share one world frame, so importing all three shows them
-   standing where the person stood.
+3. Fitted SMPL-X bodies, simplest first:
+   - `sequence/smplx_preview.png`: all poses in one picture, joints in red.
+   - `sequence/smplx_interactive.html`: open in a browser, drag to rotate, click a
+     pose in the legend to hide or show it. All poses share one world frame.
+   - `sequence/smplx/pose1.obj` / `.ply` (also pose2, pose3): open in Blender
+     (free) or MeshLab. Z is up, units are metres; import all three to see them
+     standing where the person stood.
 4. Everything together, with timeline and reference frames:
 
    ```bash
