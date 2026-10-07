@@ -265,6 +265,29 @@ def run_steps(steps):
         runpy.run_path(path, run_name="__main__")
 
 
+
+def run_global_stage(output_path, versions):
+    """Global reconstruction (sequence, SMPL-X, OpenSim, viewer) for each version.
+
+    Runs scripts/run_global.py on the finished output folder. Every part of it
+    that needs an optional dependency (smplx weights, opensim, rerun) reports
+    what is missing and carries on, so this never fails a finished pipeline.
+    """
+    if "--no-global" in sys.argv:
+        print("\nSkipping global reconstruction (--no-global).")
+        return
+    script = os.path.join(PARENT_SCRIPT_DIR, "run_global.py")
+    for version in versions:
+        print("\n" + "=" * 70)
+        print(f"GLOBAL RECONSTRUCTION: {version}")
+        print("=" * 70, flush=True)
+        code = subprocess.run([sys.executable, script, output_path, "--version", version],
+                              cwd=PROJECT_ROOT).returncode
+        if code:
+            print(f"    [!] global reconstruction for {version} exited with code {code}; "
+                  f"the main pipeline results above are unaffected")
+
+
 def print_photo_naming():
     print("Expected photo naming (per pose folder):")
     print("  01.jpg = 0 deg (front)")

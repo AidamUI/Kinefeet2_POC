@@ -6,5 +6,11 @@ scipy>=1.10.0
 matplotlib>=3.7.0
 pyyaml>=6.0
 
+# Global reconstruction (scripts 09-12): viewer and joint angles
+rerun-sdk>=0.20
+opensim>=4.5
+# SMPL-X fitting (script 10) additionally needs: smplx torch trimesh
+# and the licensed model files, see GLOBAL_RECONSTRUCTION.md
+
 # Optional: interactive rotatable 3D viewer (script 05)
 plotly>=5.18.0

@@ -73,19 +73,19 @@ def test_intrinsics(n_views=22, seed=1):
     return worst
 
 
-def test_extrinsics(seed=2):
-    """Recover a known 4-camera rig from synthetic views of a board on the floor."""
+def test_extrinsics(seed=2, n_cams=4):
+    """Recover a known n-camera rig (4 or 8) from synthetic views of a board on the floor."""
     true_K = np.array([[980.0, 0, 640.0], [0, 980.0, 360.0], [0, 0, 1]])
     radius, height = 3.2, 1.35
     eyes = [
         np.array([radius * np.cos(a), radius * np.sin(a), height])
-        for a in np.radians([0, 90, 180, 270])
+        for a in np.radians(np.arange(n_cams) * 360.0 / n_cams)
     ]
     target = np.array([0.0, 0.0, 0.0])
 
     rng = np.random.default_rng(seed)
     observations = []
-    intrinsics = {c: (true_K, np.zeros(5), SIZE, "synthetic") for c in range(4)}
+    intrinsics = {c: (true_K, np.zeros(5), SIZE, "synthetic") for c in range(n_cams)}
 
     # Three board placements on the floor, in the world Z=0 plane.
     placements = [
@@ -116,16 +116,16 @@ def test_extrinsics(seed=2):
                 print(f"    [!] camera {c} placement {p}: not detected")
                 continue
             obj, img = common.points_from_detection(detection, use_corners=False)
-            observations.append((c, p, obj.astype(np.float64), img.astype(np.float64)))
+            observations.append((c, p, obj.astype(np.float64), img.astype(np.float64), f"synthetic_{c}_{p}"))
 
     T_cam, T_board, _ = ext.initialise(
-        observations, intrinsics, 4, len(placements), "z_up"
+        observations, intrinsics, n_cams, len(placements), "z_up"
     )
     T_cam, T_board, _ = ext.bundle_adjust(observations, intrinsics, T_cam, T_board)
 
-    print("\n  EXTRINSICS (known 4-camera rig, synthetic views)")
+    print("\n  EXTRINSICS (known n-camera rig, synthetic views)")
     _, errors = ext.errors_per_camera(
-        observations, intrinsics, T_cam, T_board, [f"cam{c}" for c in range(4)]
+        observations, intrinsics, T_cam, T_board, [f"cam{c}" for c in range(n_cams)]
     )
     print(f"    reprojection RMS    {np.sqrt((errors ** 2).mean()):.4f} px")
 
@@ -146,6 +146,12 @@ def test_extrinsics(seed=2):
         print(f"    board triangulation {1000 * np.sqrt((residuals ** 2).mean()):.2f} mm"
               f"   scale {100 * (np.mean(scale) - 1):+.3f}%")
     return worst
+
+
+def test_extrinsics_eight_cameras():
+    """The same code recovers an 8-camera ring: no 4-camera assumption anywhere."""
+    worst = test_extrinsics(seed=3, n_cams=8)
+    assert worst < 0.05, f"worst camera position error {1000 * worst:.1f} mm"
 
 
 def main():

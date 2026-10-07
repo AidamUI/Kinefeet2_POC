@@ -47,6 +47,8 @@ def load_3d_joints(joints_file):
     # Extract 3D coordinates
     joints_3d = {}
     for name, joint_data in data['joints'].items():
+        if joint_data is None:   # joint could not be triangulated (too few views)
+            continue
         joints_3d[name] = np.array([joint_data['x'], joint_data['y'], joint_data['z']])
     
     return joints_3d, data.get('diagnostics', {})
@@ -103,13 +105,29 @@ def project_3d_to_2d(point_3d, P):
     return point_2d
 
 
+def apply_lens_distortion(point_2d, K, dist_coeffs):
+    """Map an ideal (pinhole) pixel to where the lens actually puts it.
+
+    Triangulation uses undistorted detections, so the projected 3D point is an
+    ideal pixel; the detection in the photo is distorted. Comparing the two
+    without this step would measure the lens, not the reconstruction.
+    No-op when the camera has no distortion coefficients.
+    """
+    if K is None or dist_coeffs is None or len(dist_coeffs) == 0 or not np.any(dist_coeffs):
+        return point_2d
+    xy = (np.linalg.inv(K) @ np.append(point_2d, 1.0))[:2]
+    pts = np.array([[xy[0], xy[1], 1.0]])
+    out, _ = cv2.projectPoints(pts, np.zeros(3), np.zeros(3), K, np.asarray(dist_coeffs, dtype=np.float64))
+    return out.reshape(2)
+
+
 def calculate_reprojection_error(point_2d_detected, point_2d_projected):
     """Calculate Euclidean distance between detected and projected points."""
     return np.linalg.norm(point_2d_detected - point_2d_projected)
 
 
 def draw_reprojection_comparison(image, keypoints_2d, joints_3d, P, 
-                                 landmark_names, show_errors=True):
+                                 landmark_names, show_errors=True, K=None, dist_coeffs=None):
     """
     Draw comparison between original 2D detections and back-projected 3D points.
     """
@@ -130,7 +148,7 @@ def draw_reprojection_comparison(image, keypoints_2d, joints_3d, P,
         
         # Get 3D point and project it
         point_3d = joints_3d[name]
-        point_2d_projected = project_3d_to_2d(point_3d, P)
+        point_2d_projected = apply_lens_distortion(project_3d_to_2d(point_3d, P), K, dist_coeffs)
         
         # Calculate error
         error = calculate_reprojection_error(point_2d_detected, point_2d_projected)
@@ -347,11 +365,15 @@ def process_pose(data_dir, pose_name, version, output_dir):
         # Rescaled to THIS photo's actual resolution, not the one cameras.json
         # was calibrated at - see effective_projection_matrix.
         P = effective_projection_matrix(cam_data, photo_width, photo_height)
+        # K matching this P (P = K [R | t]) and this camera\'s lens distortion
+        K_eff = P[:, :3] @ np.array(cam_data["R"], dtype=np.float64).T
+        dist = np.array(cam_data.get("dist_coeffs") or [], dtype=np.float64)
         
         # Create reprojection visualization
         img_annotated, errors = draw_reprojection_comparison(
             image, keypoints_2d, joints_3d, P, 
-            landmark_names, show_errors=True
+            landmark_names, show_errors=True,
+            K=K_eff, dist_coeffs=dist
         )
         
         # Add statistics overlay

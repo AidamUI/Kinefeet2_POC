@@ -535,6 +535,12 @@ python scripts/07_generate_mediapipe_mesh.py
 python scripts/06_fit_smplx_mesh.py
 ```
 
+**Recommended for several poses of one person:** `python scripts/10_fit_smplx_sequence.py <rig>/output`
+fits one shared body shape to all poses, adds a 2D reprojection term and a floor
+constraint, and places the meshes in the calibrated world frame (outputs in
+`<rig>/output/<version>/sequence/smplx/`). It runs automatically at the end of every
+pipeline wrapper when the weights are present. See `GLOBAL_RECONSTRUCTION.md`.
+
 **Note:** SMPL-X fitting may show high loss values. This is expected due to joint structure mismatch between MediaPipe (33 landmarks) and SMPL-X (different joint system). The MediaPipe-native mesh is recommended for most users.
 
 ---

@@ -75,10 +75,17 @@ extrinsics:
   # order of the files in it. These names become the keys in cameras.json and
   # must line up with the order of your capture photos (01.png .. 04.png).
   cameras: [cam01, cam02, cam03, cam04]
+  # 8-camera rig: use these instead (one synchronised image per camera in each
+  # position folder, named so they sort 01..08), and add the 8camera export
+  # targets under `export:` below.
+  # cameras: [cam01, cam02, cam03, cam04, cam05, cam06, cam07, cam08]
 
   # Intrinsics to use for each camera: a name from `intrinsics.sources` above.
   # `share_intrinsics` gives every camera the same one.
   share_intrinsics: single_camera
+  # If the cameras are DIFFERENT models (different phones), they need their own
+  # intrinsics: add one folder per camera under `intrinsics.sources` above, remove
+  # `share_intrinsics`, and map every camera here:
   # per_camera_intrinsics:
   #   cam01: cam01
   #   cam02: cam02
@@ -111,3 +118,10 @@ export:
     - name: 4camera / waist_down
       path: ../4camera/output/waist_down/cameras.json
       capture_dir: ../4camera/data/waist_down
+    # 8-camera rig (uncomment, and list cam01..cam08 under extrinsics.cameras):
+    # - name: 8camera / full_body
+    #   path: ../8camera/output/full_body/cameras.json
+    #   capture_dir: ../8camera/data/full_body
+    # - name: 8camera / waist_down
+    #   path: ../8camera/output/waist_down/cameras.json
+    #   capture_dir: ../8camera/data/waist_down

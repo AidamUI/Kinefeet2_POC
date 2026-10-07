@@ -9,7 +9,11 @@ config.yaml measurements, and skips itself automatically once
 camera_calibration/ has produced a real cameras.json.
 
 Usage:
-    python run_pipeline.py
+    python run_pipeline.py [--no-global]
+
+After the steps, scripts/run_global.py (world-frame sequence, SMPL-X mesh, OpenSim
+joint angles, Rerun viewer) runs on output/ for each version with results; pass
+--no-global to skip it. See GLOBAL_RECONSTRUCTION.md.
 
 Equivalent to running these one at a time:
     python 02_extract_2d_keypoints.py
@@ -21,6 +25,8 @@ Equivalent to running these one at a time:
 
 import runpy
 import os
+import subprocess
+import sys
 
 SCRIPT_DIR = os.path.dirname(__file__)
 STEPS = [
@@ -39,6 +45,15 @@ def main():
         print(f"RUNNING {step}")
         print("=" * 70)
         runpy.run_path(path, run_name="__main__")
+
+    if "--no-global" in sys.argv:
+        return
+    project = os.path.dirname(SCRIPT_DIR)
+    output = os.path.join(project, "output")
+    for version in ("full_body", "waist_down"):
+        if os.path.exists(os.path.join(output, version, "pose1", "joints_3d.json")):
+            subprocess.run([sys.executable, os.path.join(SCRIPT_DIR, "run_global.py"), output,
+                            "--version", version], cwd=project)
 
 
 if __name__ == "__main__":
