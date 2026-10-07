@@ -106,3 +106,10 @@ site/
 # sensitive information
 sensitive_information/
 presentations/
+
+# Generated viewer / large artefacts of the global stage (regenerate with scripts/run_global.py)
+*/output*/*/sequence/*.rrd
+*/output*/*/sequence/smplx_interactive.html
+*/output*/*/sequence/smplx/*.ply
+*/output*/*/sequence/opensim/*.osim
+*/output*/*/sequence/opensim/Model_Pose2Sim_simple.osim

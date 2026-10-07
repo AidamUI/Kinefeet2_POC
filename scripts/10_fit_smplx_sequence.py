@@ -219,7 +219,7 @@ def fit_sequence(model, target, weight, free_joints, kabsch, use_floor=True,
     }
 
 
-def render_preview(path, vertices, faces, target, frames, max_faces=7000):
+def render_preview(path, vertices, faces, target, frames, max_faces=14000):
     """One image with every fitted mesh (blue) and its triangulated joints (red dots)."""
     import matplotlib
     matplotlib.use("Agg")
@@ -227,7 +227,7 @@ def render_preview(path, vertices, faces, target, frames, max_faces=7000):
     from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
     sel = np.random.default_rng(0).choice(len(faces), min(max_faces, len(faces)), replace=False)
-    fig = plt.figure(figsize=(5 * len(frames), 6))
+    fig = plt.figure(figsize=(5.5 * len(frames), 6.5))
     for f, pose in enumerate(frames):
         ax = fig.add_subplot(1, len(frames), f + 1, projection="3d")
         ax.add_collection3d(Poly3DCollection(vertices[f][faces[sel]], facecolor="lightsteelblue",
@@ -235,7 +235,7 @@ def render_preview(path, vertices, faces, target, frames, max_faces=7000):
         pts = target[f][~np.all(target[f] == 0, axis=1)]
         ax.scatter(pts[:, 0], pts[:, 1], pts[:, 2], c="crimson", s=10)
         mid = (vertices[f].max(0) + vertices[f].min(0)) / 2
-        r = max(1.0, float((vertices[f].max(0) - vertices[f].min(0)).max()) / 2 + 0.1)
+        r = max(0.9, float((vertices[f].max(0) - vertices[f].min(0)).max()) / 2 + 0.1)
         ax.set_xlim(mid[0] - r, mid[0] + r)
         ax.set_ylim(mid[1] - r, mid[1] + r)
         ax.set_zlim(max(0.0, mid[2] - r), max(0.0, mid[2] - r) + 2 * r)
