@@ -9,6 +9,12 @@ from synchronised views of the square-grid board.
 
 Reads output/intrinsics/*.json, writes output/extrinsics.json.
 
+With ``--debug``, also writes one annotated image per camera per board
+placement to ``output/debug/extrinsic/<placement>/<camera>.png``: green
+circles are the detected board points, red crosses are those same points
+reprojected through the final camera and board poses (after bundle
+adjustment), and the header reports that view's RMS/max error.
+
 How it works
     Every camera that sees the board gets the board's pose by solvePnP. If two
     cameras see the *same* board placement, composing one pose with the inverse
@@ -71,13 +77,14 @@ def from_vec(v):
 # --------------------------------------------------------------------------
 
 
-def gather(cfg, debug=False):
+def gather(cfg):
     """Detect the board in every camera image of every placement.
 
     Returns ``(observations, cameras, positions, sizes, focals)`` where an
     observation is ``(camera_index, position_index, object_points,
-    image_points)``, and ``sizes`` / ``focals`` record each camera's frame size
-    and the focal length its own view of the board implies.
+    image_points, image_path)``, and ``sizes`` / ``focals`` record each
+    camera's frame size and the focal length its own view of the board
+    implies.
     """
     extr = cfg["extrinsics"]
     camera_names = list(extr["cameras"])
@@ -110,7 +117,7 @@ def gather(cfg, debug=False):
                       "flipped feed makes a left-handed camera.")
                 continue
             obj, img = common.points_from_detection(detection, use_corners)
-            observations.append((c, p, obj.astype(np.float64), img.astype(np.float64)))
+            observations.append((c, p, obj.astype(np.float64), img.astype(np.float64), path))
             found_any = True
             sizes[c] = detection.image_size
             focal = common.focal_from_board(detection)
@@ -118,20 +125,41 @@ def gather(cfg, debug=False):
                 focals.setdefault(c, []).append(focal)
             print(f"    {name:8s} {detection.debug['n_cells']:2d}/24 squares  "
                   f"{os.path.basename(path)}")
-            if debug:
-                _write_debug(label, name, path, detection)
         if found_any:
             positions.append(label)
 
     return observations, camera_names, positions, sizes, focals
 
 
-def _write_debug(label, name, path, detection):
-    out = os.path.join(common.HERE, "output", "debug", "extrinsic", label)
-    os.makedirs(out, exist_ok=True)
-    image = cv2.imread(path)
-    if image is not None:
-        cv2.imwrite(os.path.join(out, f"{name}.png"), sg.draw(image, detection, radius=2))
+def write_debug_reprojection(observations, intrinsics, T_cam, T_board, camera_names, positions):
+    """One annotated image per observation, using the *final* camera and
+    board poses (after bundle adjustment, when it ran).
+
+    Green circles are the detected square points, red crosses are those same
+    board points reprojected through the fitted camera pose, and the header
+    reports this view's RMS/max error - the same visual language as
+    calibrate_intrinsics.py's debug output, so the two stages read the same
+    way.
+    """
+    out_root = os.path.join(common.HERE, "output", "debug", "extrinsic")
+    for c, p, obj, img, path in observations:
+        if c not in T_cam or p not in T_board:
+            continue
+        image = cv2.imread(path)
+        if image is None:
+            continue
+        K, dist, _, _ = intrinsics[c]
+        projected = project(obj, T_cam[c], T_board[p], K, dist)
+        errs = np.linalg.norm(projected - img, axis=1)
+        label = positions[p]
+        name = camera_names[c]
+        header = [f"{name}  @  {label}", f"reprojection RMS {np.sqrt((errs**2).mean()):.3f} px   "
+                  f"max {errs.max():.3f} px"]
+        annotated = common.draw_reprojection(image, img, projected, header)
+        out = os.path.join(out_root, label)
+        os.makedirs(out, exist_ok=True)
+        cv2.imwrite(os.path.join(out, f"{name}.png"), annotated)
+    print(f"  annotated reprojection -> {os.path.relpath(out_root, common.HERE)}")
 
 
 def load_intrinsics(cfg, camera_names):
@@ -260,7 +288,7 @@ def initialise(observations, intrinsics, n_cameras, n_positions, world_frame):
     """
     # Board pose as seen by each camera, per (camera, position).
     seen = {}
-    for c, p, obj, img in observations:
+    for c, p, obj, img, _ in observations:
         K, dist, _, _ = intrinsics[c]
         ok, rvec, tvec = cv2.solvePnP(
             obj, img, K, dist, flags=cv2.SOLVEPNP_ITERATIVE
@@ -336,7 +364,7 @@ def bundle_adjust(observations, intrinsics, T_cam, T_board, refine_focal=False):
     def residuals(x):
         cams, boards, scales = unpack(x)
         out = []
-        for c, p, obj, img in observations:
+        for c, p, obj, img, _ in observations:
             if c not in cams or p not in boards:
                 continue
             K, dist, _, _ = intrinsics[c]
@@ -364,7 +392,7 @@ def bundle_adjust(observations, intrinsics, T_cam, T_board, refine_focal=False):
 def errors_per_camera(observations, intrinsics, T_cam, T_board, camera_names):
     per_camera = {}
     all_errors = []
-    for c, p, obj, img in observations:
+    for c, p, obj, img, _ in observations:
         if c not in T_cam or p not in T_board:
             continue
         K, dist, _, _ = intrinsics[c]
@@ -385,7 +413,7 @@ def triangulation_check(observations, intrinsics, T_cam, T_board):
     shape.
     """
     by_position = {}
-    for c, p, obj, img in observations:
+    for c, p, obj, img, _ in observations:
         if c not in T_cam:
             continue
         by_position.setdefault(p, []).append((c, obj, img))
@@ -467,12 +495,12 @@ def main():
     extr = cfg["extrinsics"]
 
     common.banner("EXTRINSICS")
-    observations, camera_names, positions, sizes, focals = gather(cfg, debug=args.debug)
+    observations, camera_names, positions, sizes, focals = gather(cfg)
     if not observations:
         raise SystemExit("\nThe board was not found in any extrinsic image.")
 
     intrinsics = load_intrinsics(cfg, camera_names)
-    n_positions = max(p for _, p, _, _ in observations) + 1
+    n_positions = max(p for _, p, _, _, _ in observations) + 1
     intrinsics, mismatch = adapt_intrinsics(
         intrinsics, camera_names, sizes, focals,
         estimate_focal=args.estimate_focal or bool(extr.get("estimate_focal", False)),
@@ -515,6 +543,9 @@ def main():
         e = np.array(errs)
         print(f"      {name:8s} RMS {np.sqrt((e**2).mean()):6.3f} px   "
               f"max {e.max():6.3f} px   ({len(e)} points)")
+
+    if args.debug:
+        write_debug_reprojection(observations, intrinsics, T_cam, T_board, camera_names, positions)
 
     # ---- geometry report -------------------------------------------------
     print(f"\n  world frame: origin at the board's corner square in "

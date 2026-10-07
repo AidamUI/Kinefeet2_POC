@@ -9,10 +9,14 @@ python calibrate_extrinsics.py      # where each camera is, in one world frame
 python export_cameras.py            # writes cameras.json for the pipeline
 ```
 
-Add `--debug` to either calibration stage to write annotated images showing
-exactly which squares were found and how they were labelled. Check these the
-first time you run against new data. It takes ten seconds and catches most
-problems early.
+Add `--debug` to either calibration stage to write annotated images to
+`output/debug/`. Each image shows which squares were found and how they were
+labelled, plus a reprojection overlay: green circles are the detected
+points, red crosses are those same points reprojected through the fitted
+camera model, and the header reports that view's error in pixels. Tight
+overlap between circles and crosses is what a good calibration looks like;
+visible gaps mean something is off. Check these the first time you run
+against new data - it takes ten seconds and catches most problems early.
 
 ## The target
 
@@ -136,7 +140,7 @@ constant factor.
 ```
 output/intrinsics/<camera>.json    K, distortion, per-view errors, uncertainties
 output/extrinsics.json             R, t and camera positions in the world frame
-output/debug/                      annotated detections, with --debug
+output/debug/                      annotated detections + reprojection overlay, with --debug
 ```
 
 World frame (`world_frame: z_up`): origin at the corner square of the first
@@ -160,3 +164,30 @@ board placement, +Z up out of the floor, units in metres.
 Detections are cached under `output/.detection_cache/`, keyed by file
 content, so re-running a stage is fast. Delete the folder to force a
 re-detect.
+
+## Calibrating the 8-camera rig
+
+No code changes are needed; the calibration is driven by `config.yaml`.
+
+1. **Photos.** Use the same Captury colour square-grid board. For extrinsics, put
+   one synchronised image from each of the 8 cameras in a folder per board
+   placement, e.g. `data/extrinsic/position_01/` (files named so they sort in
+   camera order, `01` to `08`). The board must be visible to all 8 cameras in a
+   placement and must not move. A flat board on the floor is seen at a grazing
+   angle by some cameras; use several placements (and tilt the board) so every
+   camera sees it well. For intrinsics, take about 20-30 board photos per camera
+   model (`data/intrinsic/<name>/`) at the same lens, zoom and resolution you will
+   capture subjects at.
+2. **Config.** In `config.yaml`: list `cam01` ... `cam08` under `extrinsics.cameras`,
+   add each placement folder under `extrinsics.positions`, and uncomment the two
+   `8camera` targets under `export.targets`.
+3. **Different phone models.** Cameras of different models need their own
+   intrinsics: add one source per camera under `intrinsics.sources`, remove
+   `share_intrinsics`, and fill `per_camera_intrinsics`.
+4. **Run** `python calibrate_intrinsics.py`, `python calibrate_extrinsics.py`,
+   `python export_cameras.py`, then `8camera/scripts/run_pipeline_8camera.py`.
+   The runner reports which versions use the measured calibration.
+
+Check the printed residuals before trusting the result. Capture subjects with the
+same cameras, lens, zoom, resolution and framing as the calibration (a crop
+cannot be corrected afterwards).

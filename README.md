@@ -3,14 +3,68 @@
 Proof of concept: diabetic foot assessment using computer vision and 3D
 reconstruction.
 
+## Kinefeet 1.0
+
+What it is: a web-based prototype for analysing foot kinematics during
+walking, built at Universitas Indonesia (Faculty of Medicine and Dr. Cipto
+Mangunkusumo National General Hospital, Jakarta). The published papers
+call it "KineFeet"; the name "Kinefeet 1.0" is this project's label for it,
+and the sources do not use it. [1][2]
+
+How it works:
+- Capture: two Microsoft Azure Kinect depth cameras, one behind and one
+  beside a treadmill, record 5 seconds at 30 fps. The patient wears red
+  socks with white 1 cm markers on bony landmarks. [1]
+- Analysis: the clinician uploads the video; the software detects the
+  markers, splits the stance phase automatically and reports joint angles
+  that can be exported. [1]
+- Measures: ankle inclination, medial longitudinal arch (MLA) angle and
+  first metatarsophalangeal (MTP1) angle during late stance. Ankle and
+  subtalar angles were dropped from the diagnostic study because they
+  differed significantly from manual measurements. [2]
+- Needs: Azure Kinect cameras, a treadmill, and a computer with at least
+  8 CPU cores, a GPU equal to or better than a GTX 1050, and 8 GB RAM. [1]
+
+Where it falls short (author-stated unless noted):
+- It measures joint angles during gait. It does not produce a 3D model of
+  the foot or lower limb.
+- The diagnostic study used 89 healthy adults aged 25 to 59. The authors
+  say this limits generalisation to patient groups, and call for studies in
+  gait pathologies. [2]
+- Results were compared with manual Kinovea measurements, not with a 3D
+  motion-capture system. [2]
+- The usability study had five physiatrists. It tested usability, not
+  accuracy. Gait-phase detection accuracy was 73.6%. Markers can be hidden
+  by the swinging opposite leg. [1]
+- The papers do not report diabetic-foot validation. One usability tester
+  was a non-neuropathic diabetic patient. [1]
+
+Sources: [1] Anestherita et al., Frontiers in Medical Technology, 2025,
+doi:10.3389/fmedt.2025.1677174. [2] Anestherita et al., Journal of Modern
+Rehabilitation, 2026, 20(1):47-55, doi:10.18502/jmr.v20i1.21025.
+
+### What Kinefeet 2.0 changes
+
+Kinefeet 2.0 is this proof of concept. It swaps the depth cameras, markers
+and treadmill for ordinary photographs from several calibrated cameras and
+reconstructs a 3D skeleton and body mesh by triangulation. What the PoC has
+shown: 23 of 23 landmarks reconstructed in 3 full-body poses from 4 views,
+and a lower reprojection error with calibration (3.9 to 5.2 px) than with
+assumed camera positions (18 to 26 px). What it has not shown: millimetre
+accuracy, arch or toe measurement, gait measurement, patient data, or any
+comparison with Kinefeet 1.0. It is also not a replacement for the gait
+angles above; it captures a still pose, not walking.
+
 ## Project Background
 
-Kinefeet is a diabetic foot assessment tool that helps healthcare providers
-monitor foot deformities and complications in diabetic patients. Traditional
-Kinefeet uses manual measurements and 2D photography, which can be
-time-consuming and subjective.
+Kinefeet is a foot assessment tool. This project is aimed at helping
+healthcare providers monitor foot deformities and complications in
+diabetic patients. The sources above describe Kinefeet 1.0 as a gait
+kinematics tool, not a diabetic-specific one, and the earlier claim here
+that it relied on manual measurements and 2D photography is not supported
+by them.
 
-This proof of concept modernizes diabetic foot assessment using multi-view
+This proof of concept modernizes foot assessment using multi-view
 3D reconstruction. By capturing photos from multiple angles and applying
 computer vision, it builds accurate 3D models of a patient's feet and lower
 body, enabling:
@@ -56,7 +110,10 @@ Kinefeet2_POC/
 ├── camera_calibration/   # Calibrates cameras: required for accurate results
 ├── 4camera/               # Ready-made setup for 4 synchronized cameras
 ├── 8camera/               # Ready-made setup for 8 synchronized cameras
-├── scripts/               # Generic pipeline used by all of the above
+├── scripts/               # Generic pipeline used by all of the above (02-08),
+│                          #   plus global reconstruction (09-12, run_global.py)
+├── opensim_setup/         # OpenSim model, marker set and IK setups (from Pose2Sim)
+├── tests/                 # pytest suite for the geometry and global stages
 ├── config.yaml            # Rig measurements for the generic root pipeline
 ├── requirements.txt        # Python dependencies
 ├── setup.py                # Installation script
@@ -65,6 +122,14 @@ Kinefeet2_POC/
 ├── models/                 # MediaPipe pose model
 └── smpl_models/            # Optional: for SMPL-X mesh generation
 ```
+
+**Photos and results are not in the repository.** Input photos (`*/data/`),
+calibration photos, and every per-pose result (`*/output*/*/pose*/`,
+`*/output*/*/sequence/`, calibration debug images) are git-ignored, because the
+people in the images did not agree to appear in a public repository. Put your own
+photos in the `data/` folders and run the pipelines to regenerate results.
+`cameras.json` (calibration numbers) is kept. Do not remove these ignore rules,
+and do not post photos or annotated images from real subjects in issues or pull requests.
 
 Most users should start with `4camera/` or `8camera/`, which wrap the
 scripts in `scripts/` with a ready-made configuration for that number of
@@ -179,6 +244,63 @@ Diagnostic files:
 - `reprojection_verification/`: per-camera accuracy report, produced by
   projecting the 3D result back into each photo
 
+## Global reconstruction, SMPL-X meshes and joint angles
+
+After the per-pose pipeline, `scripts/run_global.py` (run automatically at the
+end of every pipeline wrapper; `--no-global` skips it) puts the poses into one
+calibrated world frame and produces, in `<rig>/output/<version>/sequence/`:
+
+- `joints_world.npz` and `consistency.json`: all poses in one frame, plus
+  checks that bone lengths agree between poses and the feet sit on the floor
+- `smplx/<pose>.obj`, `smplx_world.npz`, `smplx_fit.json`: one SMPL-X body
+  (shared shape) fitted to every pose, placed in the world frame
+- `opensim/`: markers, a scaled musculoskeletal model, and hip, knee and ankle
+  joint angles from inverse kinematics (`joint_angles.csv`, `ik_report.json`)
+- `kinefeet.rrd`: an interactive viewer file
+
+The SMPL-X step needs the licensed model weights (see `GLOBAL_RECONSTRUCTION.md`);
+the others do not. With the current data these are separate photo poses, not
+video, so they are stacked as frames with no real timing. Real motion needs
+synchronized video: see `DEVELOPMENT.md`.
+
+### How to look at the results
+
+1. Quick look, no software: open `preview.png` (skeleton) and
+   `*_mediapipe_mesh_preview.png` (body mesh) in each pose folder.
+2. Rotate a mesh in the browser: open `*_mediapipe_mesh_interactive.html`.
+3. Fitted SMPL-X bodies, simplest first:
+   - `sequence/smplx_preview.png`: all poses in one picture, joints in red.
+   - `sequence/smplx_interactive.html`: open in a browser, drag to rotate, click a
+     pose in the legend to hide or show it. All poses share one world frame.
+   - `sequence/smplx/pose1.obj` / `.ply` (also pose2, pose3): open in Blender
+     (free) or MeshLab. Z is up, units are metres; import all three to see them
+     standing where the person stood.
+4. Everything together, with timeline and reference frames:
+
+   ```bash
+   pip install rerun-sdk
+   python -m rerun 4camera/output/full_body/sequence/kinefeet.rrd
+   ```
+
+   Tabs choose the reference frame: Global (world), Relative to each camera
+   (for example camera 1, "motion with respect to camera 1") and Relative to
+   pelvis. The left panel ticks layers on or off (skeleton, SMPL-X mesh,
+   cameras, floor); the timeline steps through the poses; the right side shows
+   each camera photo with detected points (green) and the 3D result projected
+   back (red).
+5. Numbers: `smplx_fit.json` (joint error in cm, should be below about 3),
+   `consistency.json` (bone lengths and foot height) and `opensim/ik_report.json`
+   (marker error in cm and joint angles).
+
+The SMPL-X body surface is a generic template (male by default; `--smplx-gender
+female|neutral` switches it). Only the joint positions are measured, and joint
+error is about the same for the male and neutral templates (2.4 and 2.4 cm
+average on the calibrated 4-camera poses), so the choice changes the look of the
+mesh, not the angles. Do not present the mesh as the subject's real body shape.
+
+On a rig without calibration (`output_uncalibrated/`, `8camera/`) the world frame
+is an assumed ring: the viewer still works, but heights and sizes are not metric.
+
 ## Checking quality
 
 After running the pipeline:
@@ -237,6 +359,10 @@ measurements, and run the pipeline again.
 - Produces a sparse skeleton, not a dense point cloud.
 - A single camera walked around the subject introduces timing error between
   shots; simultaneous multi-camera capture avoids this.
+- The data so far are still poses, not video: there is no real motion, gait
+  measurement or temporal smoothing yet (see `DEVELOPMENT.md`).
+- Only three points per foot are tracked, so ankle flexion is usable but arch,
+  toe and subtalar angles are not.
 - Best results need several simultaneous cameras and a real calibration.
 
 ## Improving results
@@ -263,6 +389,9 @@ useful for:
 ## Support
 
 For detailed instructions, see `GUIDE.md`.
+For global reconstruction, the SMPL-X fit and OpenSim joint angles, see
+`GLOBAL_RECONSTRUCTION.md`. For extending the project (video, tests, data
+formats), see `DEVELOPMENT.md`.
 For the calibration system, see `camera_calibration/README.md`.
 For the 4-camera and 8-camera rig setups, see `4camera/README.md` and
 `8camera/README.md`.

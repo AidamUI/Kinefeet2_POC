@@ -25,7 +25,8 @@ import numpy as np
 import yaml
 
 sys.path.insert(0, os.path.dirname(__file__))
-from utils import landmarks_for_version, LANDMARK_NAMES, reprojection_error
+from utils import (landmarks_for_version, LANDMARK_NAMES, reprojection_error,
+                   camera_key_for_image, undistort_pixels)
 
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), "..", "config.yaml")
 OUTPUT_ROOT = os.path.join(os.path.dirname(__file__), "..", "output")
@@ -120,20 +121,30 @@ def load_keypoints_for_pose(version, pose_name):
     return records
 
 
-def triangulate_pose(version, pose_name, cameras, min_visibility, min_views):
+def triangulate_pose(version, pose_name, cameras, min_visibility, min_views, undistort=True):
     records = load_keypoints_for_pose(version, pose_name)
     if not records:
         print(f"  (no 2D keypoints for {version}/{pose_name}, skipping - run script 02 first)")
         return None
     if len(records) != len(cameras):
-        print(f"  [!] WARNING: {len(records)} photos but {len(cameras)} camera entries. "
-              f"Cameras are assigned to photos by sorted order - double check "
-              f"your filenames / config.yaml angles_deg match!")
+        print(f"  note: {len(records)} photos with detections but {len(cameras)} cameras - "
+              f"cameras are matched to photos by filename (01 = cam_00), so the missing "
+              f"views are simply left out.")
 
-    cam_list = list(cameras.values())
+    # Match each photo to its camera by filename (01 -> cam_00, 02 -> cam_01...),
+    # never by list position: a view with no detection must not shift the
+    # cameras of every view after it.
+    cam_keys = [camera_key_for_image(r["image"], cameras) for r in records]
+    if len(set(cam_keys)) != len(cam_keys):
+        raise ValueError(f"{version}/{pose_name}: two photos map to the same camera: {cam_keys}")
+    cam_list = [cameras[k] for k in cam_keys]
     # Per-photo P, corrected for any harmless resolution difference between
     # calibration and capture (see effective_projection_matrices).
     P_by_cam = effective_projection_matrices(cam_list, records)
+    # Matching K for each photo, recovered from P = K [R | t] = [K R | K t].
+    K_by_cam = [P[:, :3] @ np.array(cam["R"], dtype=np.float64).T
+                for P, cam in zip(P_by_cam, cam_list)]
+    dist_by_cam = [cam.get("dist_coeffs") or [] for cam in cam_list]
     landmark_indices, _ = landmarks_for_version(version)
 
     # Get image dimensions (use first image)
@@ -169,16 +180,19 @@ def triangulate_pose(version, pose_name, cameras, min_visibility, min_views):
 
     for idx in landmark_indices:
         name = LANDMARK_NAMES[idx]
-        P_list, uv_list, w_list, used_cams = [], [], [], []
+        P_list, uv_list, raw_uv_list, w_list, used_cams = [], [], [], [], []
 
-        n = min(len(records), len(cam_list))
-        for i in range(n):
+        for i in range(len(records)):
             lm = records[i]["landmarks"][idx]
             if lm["visibility"] >= min_visibility:
+                raw = (lm["x_px"], lm["y_px"])
+                uv = (tuple(undistort_pixels(raw, K_by_cam[i], dist_by_cam[i])[0])
+                      if undistort else raw)
                 P_list.append(P_by_cam[i])
-                uv_list.append((lm["x_px"], lm["y_px"]))
+                uv_list.append(uv)
+                raw_uv_list.append(raw)
                 w_list.append(lm["visibility"])
-                used_cams.append(i)
+                used_cams.append(int(cam_keys[i].split("_")[1]))
 
         if len(P_list) < min_views:
             joints_3d[name] = None
@@ -194,17 +208,20 @@ def triangulate_pose(version, pose_name, cameras, min_visibility, min_views):
         mean_err_px = float(np.mean(errs))
         max_err_px = float(np.max(errs))
         
+        raw_errs = [reprojection_error(P, X, uv) for P, uv in zip(P_list, raw_uv_list)]
         joints_3d[name] = {"index": idx, "x": X[0], "y": X[1], "z": X[2]}
         diagnostics[name] = {
             "status": "ok",
             "views_used": used_cams,
             "mean_reprojection_error_px": mean_err_px,
             "max_reprojection_error_px": max_err_px,
+            "mean_reprojection_error_raw_px": float(np.mean(raw_errs)),
             "mean_reprojection_error_normalized": mean_err_px / person_scale,
             "max_reprojection_error_normalized": max_err_px / person_scale,
         }
 
-    return {"pose": pose_name, "version": version,
+    return {"pose": pose_name, "version": version, "undistorted": bool(undistort),
+            "cameras_used": cam_keys,
             "joints": joints_3d, "diagnostics": diagnostics,
             "image_width": img_width, "image_height": img_height,
             "person_scale_px": float(person_scale)}
@@ -214,6 +231,7 @@ def main():
     cfg = load_config()
     min_visibility = cfg["triangulation"]["min_visibility"]
     min_views = cfg["triangulation"]["min_views"]
+    undistort = cfg["triangulation"].get("undistort", True)
 
     for version in ["full_body", "waist_down"]:
         cameras = load_cameras(version)
@@ -223,7 +241,7 @@ def main():
 
         for pose_name in ["pose1", "pose2", "pose3"]:
             print(f"\n[{version}/{pose_name}]")
-            result = triangulate_pose(version, pose_name, cameras, min_visibility, min_views)
+            result = triangulate_pose(version, pose_name, cameras, min_visibility, min_views, undistort)
             if result is None:
                 continue
 

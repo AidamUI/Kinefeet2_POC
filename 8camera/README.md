@@ -45,17 +45,21 @@ degrees.
 
 4. Check results in `output/`.
 
-## Camera positions are assumed, not measured
+## Camera positions: measured if calibrated, otherwise assumed
 
-Unlike `4camera/` (see [`../4camera/README.md`](../4camera/README.md) and
-[`../camera_calibration/README.md`](../camera_calibration/README.md)), there
-is no calibrated option here yet, because `camera_calibration/` does not
-target an 8-camera rig. `03_setup_camera_rig.py` always builds an
-approximate ring from the radius, height and field-of-view numbers in
-`config_8camera.yaml`. The cameras are assumed to sit on a perfect circle at
-exactly that radius and height, aimed exactly at the target point, with a
-guessed field of view and no lens distortion. Every distance in the 3D
-output is only as accurate as those typed-in numbers.
+If `camera_calibration/` has written `output/<version>/cameras.json` here (see
+"Calibrating the 8-camera rig" in
+[`../camera_calibration/README.md`](../camera_calibration/README.md)),
+`run_pipeline_8camera.py` uses it as is: step 03 keeps a calibrated file, and the
+results are metric. No code changes are needed, only the calibration photos and
+config entries.
+
+Without a calibration, `03_setup_camera_rig.py` builds an approximate ring from
+the radius, height and field-of-view numbers in `config_8camera.yaml`. The
+cameras are assumed to sit on a perfect circle at exactly that radius and
+height, aimed exactly at the target point, with a guessed field of view and no
+lens distortion. Every distance in the 3D output is then only as accurate as
+those typed-in numbers, and the runner prints a warning.
 
 ## Notes
 
