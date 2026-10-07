@@ -31,6 +31,10 @@ Steps run, per version (full_body / waist_down) that has photos:
     6. 08_verify_reprojection.py    reprojects the 3D result back into each
                                      photo - here this measures agreement with
                                      the assumed ring, not a real calibration
+
+After the steps above, the global reconstruction stage (scripts/run_global.py: world-frame
+sequence, SMPL-X mesh, OpenSim joint angles, Rerun viewer) runs on the results; pass
+--no-global to skip it. See GLOBAL_RECONSTRUCTION.md.
 """
 
 import os
@@ -93,6 +97,7 @@ def main():
         common.run_steps(STEPS)
 
     common.print_results_summary(OUTPUT_PATH)
+    common.run_global_stage(OUTPUT_PATH, versions)
 
 
 if __name__ == "__main__":

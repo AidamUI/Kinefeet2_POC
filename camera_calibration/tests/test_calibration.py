@@ -116,7 +116,7 @@ def test_extrinsics(seed=2):
                 print(f"    [!] camera {c} placement {p}: not detected")
                 continue
             obj, img = common.points_from_detection(detection, use_corners=False)
-            observations.append((c, p, obj.astype(np.float64), img.astype(np.float64)))
+            observations.append((c, p, obj.astype(np.float64), img.astype(np.float64), f"synthetic_{c}_{p}"))
 
     T_cam, T_board, _ = ext.initialise(
         observations, intrinsics, 4, len(placements), "z_up"

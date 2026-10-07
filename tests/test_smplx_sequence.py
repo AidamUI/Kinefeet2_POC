@@ -65,3 +65,42 @@ def test_floor_term_reduces_penetration():
     free = fit.fit_sequence(model, target, weight, s06.FULL_BODY_FREE_JOINTS, s06.kabsch, use_floor=False, **kw)
     floor = fit.fit_sequence(model, target, weight, s06.FULL_BODY_FREE_JOINTS, s06.kabsch, use_floor=True, **kw)
     assert floor["min_vertex_z_m"].min() > free["min_vertex_z_m"].min()
+
+
+def project_np(joints, K, R, t):
+    pc = joints @ R.T + t
+    uv = pc[:, :2] / pc[:, 2:3]
+    return uv * np.array([K[0, 0], K[1, 1]]) + np.array([K[0, 2], K[1, 2]])
+
+
+def test_reprojection_term_pulls_noisy_3d_toward_observations():
+    model, joints, _ = make_truth(betas0=1.0)
+    F = joints.shape[0]
+    rng = np.random.default_rng(5)
+    noisy = joints + rng.normal(scale=0.04, size=joints.shape)      # bad triangulation, 4 cm noise
+    target, weight = targets_from(noisy)
+    K = np.array([[900.0, 0, 640], [0, 900.0, 360], [0, 0, 1]])
+    cams = {"K": np.stack([K, K]), "R": [], "t": []}
+    for ang in (0, 60):
+        R = Rotation.from_euler("z", ang, degrees=True).as_matrix()
+        Rcam = np.array([[1, 0, 0], [0, 0, -1], [0, 1, 0.0]]) @ R   # z-up world -> camera looking along +y
+        cams["R"].append(Rcam)
+        cams["t"].append(-Rcam @ np.array([0.0, -5.0, 1.0]))
+    cams["R"], cams["t"] = np.stack(cams["R"]), np.stack(cams["t"])
+    obs = np.full((F, 2, 22, 3), np.nan)
+    for f in range(F):
+        for c in range(2):
+            for i in INDICES:
+                if len(s06.CORRESPONDENCES[i][0]) == 1:
+                    obs[f, c, i, :2] = project_np(joints[f, i][None], cams["K"][c], cams["R"][c], cams["t"][c])[0]
+                    obs[f, c, i, 2] = 1.0
+    kw = dict(use_floor=False, stage_a=150, stage_b=300)
+    base = fit.fit_sequence(model, target, weight, s06.FULL_BODY_FREE_JOINTS, s06.kabsch, **kw)
+    with2d = fit.fit_sequence(model, target, weight, s06.FULL_BODY_FREE_JOINTS, s06.kabsch,
+                              obs2d=obs, cameras=cams, reproj_weight=5.0, **kw)
+
+    def err(r):
+        return np.linalg.norm(r["joints"][:, INDICES] - joints[:, INDICES], axis=-1).mean()
+
+    assert with2d["reproj_px"] is not None
+    assert err(with2d) < err(base)

@@ -127,9 +127,9 @@ def triangulate_pose(version, pose_name, cameras, min_visibility, min_views, und
         print(f"  (no 2D keypoints for {version}/{pose_name}, skipping - run script 02 first)")
         return None
     if len(records) != len(cameras):
-        print(f"  [!] WARNING: {len(records)} photos but {len(cameras)} camera entries. "
-              f"Cameras are assigned to photos by sorted order - double check "
-              f"your filenames / config.yaml angles_deg match!")
+        print(f"  note: {len(records)} photos with detections but {len(cameras)} cameras - "
+              f"cameras are matched to photos by filename (01 = cam_00), so the missing "
+              f"views are simply left out.")
 
     # Match each photo to its camera by filename (01 -> cam_00, 02 -> cam_01...),
     # never by list position: a view with no detection must not shift the

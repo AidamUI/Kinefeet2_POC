@@ -24,7 +24,10 @@ INPUT   <rig_output_dir>/<version>/<pose>/joints_3d.json   (script 04)
 OUTPUT  <rig_output_dir>/<version>/sequence/joints_world.npz
             joints  (F, J, 3) metres, world frame, NaN where not triangulated
             names   (J,) joint names     frames (F,) pose names
-            cam_keys, K, R, t, image_size   camera data for viewers
+            cam_keys, K, R, t, dist, image_size   camera data (calibration resolution)
+            keypoints2d (F, C, J, 3)  detected (u, v, visibility) per frame and camera,
+                        scaled to the calibration resolution and undistorted; NaN if
+                        the camera had no detection
         <rig_output_dir>/<version>/sequence/consistency.json
 """
 
@@ -37,7 +40,7 @@ import sys
 import numpy as np
 
 sys.path.insert(0, os.path.dirname(__file__))
-from utils import landmarks_for_version, LANDMARK_NAMES
+from utils import landmarks_for_version, LANDMARK_NAMES, undistort_pixels
 from frames import pelvis_centre
 
 CALIBRATED_SOURCE_MARKER = "camera_calibration/export_cameras.py"
@@ -84,12 +87,46 @@ def load_cameras(rig_dir, version):
     with open(os.path.join(rig_dir, version, "cameras.json")) as f:
         cams = json.load(f)
     keys = sorted(cams)
+    dist = np.zeros((len(keys), 5))
+    for i, k in enumerate(keys):
+        d = np.array(cams[k].get("dist_coeffs") or [], dtype=float).reshape(-1)
+        dist[i, :min(5, len(d))] = d[:5]
     return (keys,
             np.array([cams[k]["K"] for k in keys]),
             np.array([cams[k]["R"] for k in keys]),
             np.array([np.array(cams[k]["t"]).reshape(3) for k in keys]),
             np.array([[cams[k]["image_width"], cams[k]["image_height"]] for k in keys]),
-            all(cams[k].get("source") == CALIBRATED_SOURCE_MARKER for k in keys))
+            all(cams[k].get("source") == CALIBRATED_SOURCE_MARKER for k in keys),
+            dist)
+
+
+def load_keypoints_2d(rig_dir, version, frames, names, cam_keys, K, dist, image_size, undistort=True):
+    """Detected 2D landmarks as (F, C, J, 3) = (u, v, visibility), NaN where missing.
+
+    Pixels are rescaled from the photo's resolution to the calibration
+    resolution (same-framing resize) and undistorted, so they can be used
+    directly with K, R, t from cameras.json.
+    """
+    name_to_idx = {v: k for k, v in LANDMARK_NAMES.items()}
+    out = np.full((len(frames), len(cam_keys), len(names), 3), np.nan)
+    for f, pose in enumerate(frames):
+        for path in glob.glob(os.path.join(rig_dir, version, pose, "keypoints_2d", "*.json")):
+            stem = os.path.splitext(os.path.basename(path))[0]
+            if not stem.isdigit() or int(stem) - 1 >= len(cam_keys):
+                continue
+            c = int(stem) - 1
+            with open(path) as fh:
+                rec = json.load(fh)
+            sx = image_size[c][0] / float(rec.get("image_width") or image_size[c][0])
+            sy = image_size[c][1] / float(rec.get("image_height") or image_size[c][1])
+            lms = rec["landmarks"]
+            uv = np.array([[lms[name_to_idx[n]]["x_px"] * sx, lms[name_to_idx[n]]["y_px"] * sy] for n in names])
+            vis = np.array([lms[name_to_idx[n]]["visibility"] for n in names])
+            if undistort:
+                uv = undistort_pixels(uv, K[c], dist[c])
+            out[f, c, :, :2] = uv
+            out[f, c, :, 2] = vis
+    return out
 
 
 def bone_lengths(joints, names):
@@ -143,12 +180,13 @@ def main():
     args = ap.parse_args()
 
     names, frames, joints = load_sequence(args.rig_output_dir, args.version, args.poses)
-    keys, K, R, t, size, calibrated = load_cameras(args.rig_output_dir, args.version)
+    keys, K, R, t, size, calibrated, dist = load_cameras(args.rig_output_dir, args.version)
+    kp2d = load_keypoints_2d(args.rig_output_dir, args.version, frames, names, keys, K, dist, size)
     out_dir = os.path.join(args.rig_output_dir, args.version, "sequence")
     os.makedirs(out_dir, exist_ok=True)
     np.savez(os.path.join(out_dir, "joints_world.npz"), joints=joints, names=np.array(names),
-             frames=np.array(frames), cam_keys=np.array(keys), K=K, R=R, t=t, image_size=size,
-             calibrated=calibrated)
+             frames=np.array(frames), cam_keys=np.array(keys), K=K, R=R, t=t, dist=dist, image_size=size,
+             keypoints2d=kp2d, calibrated=calibrated)
     report = consistency_report(joints, names, frames, calibrated)
     with open(os.path.join(out_dir, "consistency.json"), "w") as f:
         json.dump(report, f, indent=2)

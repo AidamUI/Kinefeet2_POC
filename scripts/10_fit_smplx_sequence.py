@@ -16,8 +16,11 @@ Compared with script 06 (which fits each pose on its own), this version
 
 Loss per iteration
       3D joint distance to the triangulated joints (weighted, script 06's
-      correspondences)  +  floor penetration  +  pose prior  +  shape prior.
-Only 3D data is used; there is no 2D reprojection term.
+      correspondences)  +  2D reprojection into every camera that detected the
+      joint (robust Geman-McClure, in metric units at the joint depth)
+      +  floor penetration  +  pose prior  +  shape prior.
+The 2D term anchors the mesh to what the cameras actually saw, so a joint
+that triangulated badly from a few views is pulled back by the others.
 
 NEEDS THE SMPL-X MODEL WEIGHTS, which are licensed and cannot be downloaded
 automatically:
@@ -56,6 +59,8 @@ LEARNING_RATE = 0.03
 POSE_PRIOR_WEIGHT = 0.02
 BETA_PRIOR_WEIGHT = 0.001
 FLOOR_WEIGHT = 5.0
+REPROJ_WEIGHT = 3.0
+REPROJ_SIGMA_M = 0.05   # residuals beyond ~5 cm are down-weighted
 
 
 def load_script06():
@@ -85,9 +90,28 @@ def build_targets(joints, names, correspondences):
     return target, weight
 
 
+def build_observations_2d(kp2d, names, correspondences):
+    """(F, C, J, 3) detections -> (F, C, 22, 3) for SMPL-X joints that map to ONE landmark.
+
+    Synthetic joints (pelvis, neck = midpoints) have no direct detection and
+    stay NaN, so they are fitted from 3D only.
+    """
+    F, C = kp2d.shape[:2]
+    obs = np.full((F, C, 22, 3), np.nan)
+    for smplx_idx, (src, _) in correspondences.items():
+        if len(src) == 1 and src[0] in names:
+            obs[:, :, smplx_idx] = kp2d[:, :, names.index(src[0])]
+    return obs
+
+
 def fit_sequence(model, target, weight, free_joints, kabsch, use_floor=True,
-                 stage_a=STAGE_A_ITERS, stage_b=STAGE_B_ITERS, lr=LEARNING_RATE, num_betas=NUM_BETAS):
-    """Fit shared betas + per-frame pose to targets. ``model`` must be built with batch_size=F."""
+                 stage_a=STAGE_A_ITERS, stage_b=STAGE_B_ITERS, lr=LEARNING_RATE, num_betas=NUM_BETAS,
+                 obs2d=None, cameras=None, reproj_weight=REPROJ_WEIGHT):
+    """Fit shared betas + per-frame pose to targets. ``model`` must be built with batch_size=F.
+
+    obs2d    (F, C, 22, 3) detections (u, v, visibility), NaN where missing
+    cameras  dict with K (C,3,3), R (C,3,3), t (C,3) in the same pixel frame as obs2d
+    """
     import torch
     from scipy.spatial.transform import Rotation
 
@@ -113,6 +137,29 @@ def fit_sequence(model, target, weight, free_joints, kabsch, use_floor=True,
     betas = torch.zeros(1, num_betas, requires_grad=True)       # shared by every frame
     body_pose = torch.zeros(F, NUM_BODY_JOINTS * 3, requires_grad=True)
 
+    use_2d = obs2d is not None and cameras is not None and reproj_weight > 0
+    if use_2d:
+        o_valid = torch.tensor(~np.isnan(obs2d[..., 0]) & (np.nan_to_num(obs2d[..., 2]) > 0.1))
+        o_uv = torch.tensor(np.nan_to_num(obs2d[..., :2]), dtype=torch.float32)
+        o_w = torch.tensor(np.nan_to_num(obs2d[..., 2]), dtype=torch.float32) * o_valid
+        cK = torch.tensor(np.asarray(cameras["K"]), dtype=torch.float32)
+        cR = torch.tensor(np.asarray(cameras["R"]), dtype=torch.float32)
+        ct = torch.tensor(np.asarray(cameras["t"]), dtype=torch.float32)
+        focal = cK[:, 0, 0].mean()
+
+    def project(joints):
+        # joints (F,22,3) -> camera frame (F,C,22,3) -> pixels (F,C,22,2) and depth (F,C,22)
+        pc = torch.einsum("cij,fkj->fcki", cR, joints) + ct[:, None, :][None]
+        z = pc[..., 2].clamp_min(1e-3)
+        px = torch.einsum("cij,fckj->fcki", cK, pc / z[..., None])[..., :2]
+        return px, z
+
+    def reproj_loss(joints):
+        px, z = project(joints)
+        res_m = (px - o_uv).norm(dim=-1) * z / focal       # pixel error -> metres at the joint depth
+        gm = res_m ** 2 * REPROJ_SIGMA_M ** 2 / (res_m ** 2 + REPROJ_SIGMA_M ** 2)
+        return (o_w * gm).sum() / o_w.sum().clamp_min(1e-6)
+
     mask = torch.zeros(1, NUM_BODY_JOINTS * 3)
     for j in free_joints:
         mask[0, (j - 1) * 3:(j - 1) * 3 + 3] = 1.0
@@ -130,6 +177,8 @@ def fit_sequence(model, target, weight, free_joints, kabsch, use_floor=True,
         if use_floor:
             below = torch.relu(-out.vertices[..., 2])
             loss = loss + FLOOR_WEIGHT * (below ** 2).mean()
+        if use_2d:
+            loss = loss + reproj_weight * reproj_loss(out.joints[:, :22, :])
         return loss
 
     opt_a = torch.optim.Adam([global_orient, transl, betas], lr=lr)
@@ -153,7 +202,13 @@ def fit_sequence(model, target, weight, free_joints, kabsch, use_floor=True,
     err_cm = np.linalg.norm(pred - target, axis=-1) * 100
     err_cm = np.where(weight > 0, err_cm, np.nan)
     verts = out.vertices.numpy()
+    reproj_px = None
+    if use_2d:
+        with torch.no_grad():
+            px, _ = project(out.joints[:, :22, :])
+            reproj_px = np.where(o_valid.numpy(), (px - o_uv).norm(dim=-1).numpy(), np.nan)
     return {
+        "reproj_px": reproj_px,
         "vertices": verts, "faces": np.asarray(model.faces), "joints": pred,
         "betas": betas.detach().numpy()[0], "body_pose": body_pose.detach().numpy(),
         "global_orient": global_orient.detach().numpy(), "transl": transl.detach().numpy(),
@@ -167,6 +222,8 @@ def main():
     ap.add_argument("rig_output_dir")
     ap.add_argument("--version", default="full_body", choices=["full_body", "waist_down"])
     ap.add_argument("--gender", default="neutral", choices=["neutral", "male", "female"])
+    ap.add_argument("--reproj-weight", type=float, default=REPROJ_WEIGHT,
+                    help="weight of the 2D reprojection term (0 = 3D joints only)")
     ap.add_argument("--model-dir", default=os.path.join(HERE, "..", "smpl_models"))
     args = ap.parse_args()
 
@@ -181,6 +238,8 @@ def main():
     d = np.load(os.path.join(seq_dir, "joints_world.npz"), allow_pickle=False)
     names, frames, calibrated = [str(n) for n in d["names"]], [str(f) for f in d["frames"]], bool(d["calibrated"])
     target, weight = build_targets(d["joints"], names, s06.CORRESPONDENCES)
+    obs2d = build_observations_2d(d["keypoints2d"], names, s06.CORRESPONDENCES) if "keypoints2d" in d else None
+    cameras = {"K": d["K"], "R": d["R"], "t": d["t"]}
 
     import smplx
     model = smplx.create(model_path=args.model_dir, model_type="smplx", gender=args.gender,
@@ -188,10 +247,11 @@ def main():
     if not calibrated:
         print("  [!] cameras are NOT calibrated: floor term disabled and body size is not metric")
     res = fit_sequence(model, target, weight, s06.get_free_joints(args.version), s06.kabsch,
-                       use_floor=calibrated)
+                       use_floor=calibrated, obs2d=obs2d, cameras=cameras,
+                       reproj_weight=args.reproj_weight)
 
     np.savez(os.path.join(seq_dir, "smplx_world.npz"), frames=np.array(frames), **{
-        k: v for k, v in res.items()})
+        k: v for k, v in res.items() if v is not None})
     mesh_dir = os.path.join(seq_dir, "smplx")
     os.makedirs(mesh_dir, exist_ok=True)
     for f, pose in enumerate(frames):
@@ -202,7 +262,11 @@ def main():
         "mean_joint_error_cm": [round(float(np.nanmean(e)), 2) for e in res["joint_error_cm"]],
         "max_joint_error_cm": [round(float(np.nanmax(e)), 2) for e in res["joint_error_cm"]],
         "lowest_vertex_z_m": [round(float(z), 3) for z in res["min_vertex_z_m"]],
-        "loss_terms": "3D joint distance + floor penetration + pose prior + shape prior (no 2D term)",
+        "mean_reprojection_px": None if res["reproj_px"] is None else
+            [round(float(np.nanmean(e)), 2) for e in res["reproj_px"]],
+        "loss_terms": "3D joint distance + 2D reprojection + floor penetration + pose prior + shape prior"
+                      if res["reproj_px"] is not None else
+                      "3D joint distance + floor penetration + pose prior + shape prior (no 2D term)",
     }
     with open(os.path.join(seq_dir, "smplx_fit.json"), "w") as f:
         json.dump(report, f, indent=2)

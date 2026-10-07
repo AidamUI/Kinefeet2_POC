@@ -31,6 +31,10 @@ Steps run, per version (full_body / waist_down) that has photos:
     5. 08_verify_reprojection.py    reprojects the 3D result back into each
                                      photo, the real accuracy check
 
+After the steps above, the global reconstruction stage (scripts/run_global.py: world-frame
+sequence, SMPL-X mesh, OpenSim joint angles, Rerun viewer) runs on the results; pass
+--no-global to skip it. See GLOBAL_RECONSTRUCTION.md.
+
 Output: 4camera/output/<version>/
 """
 
@@ -99,6 +103,7 @@ def main():
         common.run_steps(STEPS)
 
     common.print_results_summary(os.path.join(common.FOUR_CAM_ROOT, "output"))
+    common.run_global_stage(os.path.join(common.FOUR_CAM_ROOT, "output"), versions)
 
 
 if __name__ == "__main__":

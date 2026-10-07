@@ -25,6 +25,10 @@ Steps run, per version (full_body / waist_down) that has photos:
     6. 08_verify_reprojection.py    reprojection accuracy check
 
 Output: 8camera/output/<version>/
+
+After the steps above, the global reconstruction stage (scripts/run_global.py: world-frame
+sequence, SMPL-X mesh, OpenSim joint angles, Rerun viewer) runs on the results; pass
+--no-global to skip it. See GLOBAL_RECONSTRUCTION.md.
 """
 
 import os
@@ -68,6 +72,7 @@ def main():
         common.run_steps(STEPS)
 
     common.print_results_summary(output_path)
+    common.run_global_stage(output_path, versions)
 
 
 if __name__ == "__main__":
