@@ -10,12 +10,13 @@ Today's data is a set of separate photo poses, not video. Each pose is one
 ## Run it
 
 ```bash
-# 1. normal pipeline first (creates joints_3d.json for every pose)
+# the pipeline wrappers run the global stage at the end (--no-global skips it)
 cd 4camera/scripts && python run_pipeline_calibrated.py && cd ../..
 
-# 2. global stages: sequence, (SMPL-X), OpenSim, viewer
-python scripts/run_global.py 4camera/output
-rerun 4camera/output/full_body/sequence/kinefeet.rrd
+# or run the global stage alone on any finished output folder
+python scripts/run_global.py 4camera/output            # also: 4camera/output_uncalibrated, 8camera/output
+python scripts/run_global.py 8camera/output --version waist_down
+python -m rerun 4camera/output/full_body/sequence/kinefeet.rrd
 ```
 
 Install: `pip install rerun-sdk opensim` (viewer and joint angles). SMPL-X also
@@ -49,6 +50,14 @@ left/right difference, and the lowest foot joint height. On a calibrated rig the
 feet should sit near Z = 0. On an assumed-ring rig Z is not tied to the floor
 and the file says so.
 
+## Checking the results
+
+- Mesh files: `sequence/smplx/pose1.obj` ... open in Blender, MeshLab or any OBJ
+  viewer (Z up, metres, all poses share one world frame).
+- Everything together: `python -m rerun <rig>/<version>/sequence/kinefeet.rrd`.
+- Numbers: `smplx_fit.json` (joint error cm, reprojection px), `consistency.json`,
+  `opensim/ik_report.json` (marker error cm, joint angles).
+
 ## Needed from you
 
 1. **SMPL-X weights** (already set up on the original machine): register at
@@ -67,5 +76,5 @@ and the file says so.
   a thigh of about 31 cm and a fitted SMPL-X body 1.5 m tall; that is plausible
   for a petite subject, but compare with the subject's real height and one
   measured limb before trusting absolute sizes.
-- The SMPL-X fit uses 3D joints only; there is no 2D reprojection term.
+- The SMPL-X fit initialises each frame on its own; for video add a temporal term.
 - `opensim_setup/` is from Pose2Sim (BSD-3-Clause), see `LICENSE_Pose2Sim`.

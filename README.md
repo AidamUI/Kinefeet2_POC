@@ -110,7 +110,10 @@ Kinefeet2_POC/
 ├── camera_calibration/   # Calibrates cameras: required for accurate results
 ├── 4camera/               # Ready-made setup for 4 synchronized cameras
 ├── 8camera/               # Ready-made setup for 8 synchronized cameras
-├── scripts/               # Generic pipeline used by all of the above
+├── scripts/               # Generic pipeline used by all of the above (02-08),
+│                          #   plus global reconstruction (09-12, run_global.py)
+├── opensim_setup/         # OpenSim model, marker set and IK setups (from Pose2Sim)
+├── tests/                 # pytest suite for the geometry and global stages
 ├── config.yaml            # Rig measurements for the generic root pipeline
 ├── requirements.txt        # Python dependencies
 ├── setup.py                # Installation script
@@ -233,6 +236,54 @@ Diagnostic files:
 - `reprojection_verification/`: per-camera accuracy report, produced by
   projecting the 3D result back into each photo
 
+## Global reconstruction, SMPL-X meshes and joint angles
+
+After the per-pose pipeline, `scripts/run_global.py` (run automatically at the
+end of every pipeline wrapper; `--no-global` skips it) puts the poses into one
+calibrated world frame and produces, in `<rig>/output/<version>/sequence/`:
+
+- `joints_world.npz` and `consistency.json`: all poses in one frame, plus
+  checks that bone lengths agree between poses and the feet sit on the floor
+- `smplx/<pose>.obj`, `smplx_world.npz`, `smplx_fit.json`: one SMPL-X body
+  (shared shape) fitted to every pose, placed in the world frame
+- `opensim/`: markers, a scaled musculoskeletal model, and hip, knee and ankle
+  joint angles from inverse kinematics (`joint_angles.csv`, `ik_report.json`)
+- `kinefeet.rrd`: an interactive viewer file
+
+The SMPL-X step needs the licensed model weights (see `GLOBAL_RECONSTRUCTION.md`);
+the others do not. With the current data these are separate photo poses, not
+video, so they are stacked as frames with no real timing. Real motion needs
+synchronized video: see `DEVELOPMENT.md`.
+
+### How to look at the results
+
+1. Quick look, no software: open `preview.png` (skeleton) and
+   `*_mediapipe_mesh_preview.png` (body mesh) in each pose folder.
+2. Rotate a mesh in the browser: open `*_mediapipe_mesh_interactive.html`.
+3. Fitted SMPL-X body: open `sequence/smplx/pose1.obj` (also pose2, pose3) in
+   Blender (free), MeshLab or any OBJ viewer. Z is up, units are metres, and the
+   meshes already share one world frame, so importing all three shows them
+   standing where the person stood.
+4. Everything together, with timeline and reference frames:
+
+   ```bash
+   pip install rerun-sdk
+   python -m rerun 4camera/output/full_body/sequence/kinefeet.rrd
+   ```
+
+   Tabs choose the reference frame: Global (world), Relative to each camera
+   (for example camera 1, "motion with respect to camera 1") and Relative to
+   pelvis. The left panel ticks layers on or off (skeleton, SMPL-X mesh,
+   cameras, floor); the timeline steps through the poses; the right side shows
+   each camera photo with detected points (green) and the 3D result projected
+   back (red).
+5. Numbers: `smplx_fit.json` (joint error in cm, should be below about 3),
+   `consistency.json` (bone lengths and foot height) and `opensim/ik_report.json`
+   (marker error in cm and joint angles).
+
+On a rig without calibration (`output_uncalibrated/`, `8camera/`) the world frame
+is an assumed ring: the viewer still works, but heights and sizes are not metric.
+
 ## Checking quality
 
 After running the pipeline:
@@ -291,6 +342,10 @@ measurements, and run the pipeline again.
 - Produces a sparse skeleton, not a dense point cloud.
 - A single camera walked around the subject introduces timing error between
   shots; simultaneous multi-camera capture avoids this.
+- The data so far are still poses, not video: there is no real motion, gait
+  measurement or temporal smoothing yet (see `DEVELOPMENT.md`).
+- Only three points per foot are tracked, so ankle flexion is usable but arch,
+  toe and subtalar angles are not.
 - Best results need several simultaneous cameras and a real calibration.
 
 ## Improving results
@@ -317,6 +372,9 @@ useful for:
 ## Support
 
 For detailed instructions, see `GUIDE.md`.
+For global reconstruction, the SMPL-X fit and OpenSim joint angles, see
+`GLOBAL_RECONSTRUCTION.md`. For extending the project (video, tests, data
+formats), see `DEVELOPMENT.md`.
 For the calibration system, see `camera_calibration/README.md`.
 For the 4-camera and 8-camera rig setups, see `4camera/README.md` and
 `8camera/README.md`.
