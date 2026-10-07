@@ -51,9 +51,10 @@ and the file says so.
 
 ## Needed from you
 
-1. **SMPL-X weights**: register at https://smpl-x.is.tue.mpg.de/, download
-   "SMPL-X v1.1", place `SMPLX_NEUTRAL.npz` (and optionally MALE/FEMALE) in
-   `smpl_models/smplx/`. They cannot be downloaded automatically (licence).
+1. **SMPL-X weights** (already set up on the original machine): register at
+   https://smpl-x.is.tue.mpg.de/, download "SMPL-X v1.1", place
+   `SMPLX_NEUTRAL.npz` (and optionally MALE/FEMALE) in `smpl_models/smplx/`.
+   Git ignores them; the licence forbids redistributing them.
 2. **Video** for real motion: synchronized video from static, calibrated cameras
    (a clap or flash visible to all cameras for syncing). Smoothing, gap filling
    and gait curves need this and are not implemented yet.
@@ -62,8 +63,9 @@ and the file says so.
 
 - MediaPipe gives 3 points per foot, so ankle flexion is usable but subtalar
   (inversion/eversion) and toe angles are weakly constrained.
-- Scale is only as good as the calibration. Bone lengths from the calibrated
-  4-camera run look short for an adult (thigh about 31 cm, hip width about 18 cm);
-  check against a known measurement before trusting absolute sizes.
+- Scale is only as good as the calibration. The calibrated 4-camera run gives
+  a thigh of about 31 cm and a fitted SMPL-X body 1.5 m tall; that is plausible
+  for a petite subject, but compare with the subject's real height and one
+  measured limb before trusting absolute sizes.
 - The SMPL-X fit uses 3D joints only; there is no 2D reprojection term.
 - `opensim_setup/` is from Pose2Sim (BSD-3-Clause), see `LICENSE_Pose2Sim`.
