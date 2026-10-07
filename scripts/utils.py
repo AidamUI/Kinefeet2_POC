@@ -163,6 +163,47 @@ def projection_matrix(K, R, t):
     return K @ Rt
 
 
+def camera_key_for_image(image_name, cameras):
+    """Camera key (``cam_00``...) for a photo, matched by its numeric filename stem.
+
+    ``01.png`` is the first camera (``cam_00``), ``02.png`` the second, and so
+    on - the same convention script 08 uses. Matching by name rather than by
+    position in a sorted list keeps every view on its own camera when some
+    photos have no detection (a missing ``03`` must not shift ``04`` onto
+    ``cam_02``).
+
+    Raises ValueError if the name is not numeric or no such camera exists, so
+    a mismatch fails loudly instead of silently corrupting the geometry.
+    """
+    import os
+    stem = os.path.splitext(os.path.basename(str(image_name)))[0]
+    if not stem.isdigit():
+        raise ValueError(f"Photo name '{image_name}' is not numeric (01, 02, ...); "
+                         f"cannot match it to a camera")
+    key = f"cam_{int(stem) - 1:02d}"
+    if key not in cameras:
+        raise ValueError(f"Photo '{image_name}' maps to {key}, which is not in cameras.json "
+                         f"({sorted(cameras)})")
+    return key
+
+
+def undistort_pixels(uv, K, dist_coeffs):
+    """Remove lens distortion from (N, 2) pixel coordinates; returns (N, 2) pixels.
+
+    Output stays in the same pixel frame (re-projected through ``K``), so it
+    can be fed straight to a projection matrix built from the same ``K``.
+    ``dist_coeffs`` empty/None means no distortion and returns ``uv`` as is.
+    """
+    uv = np.asarray(uv, dtype=np.float64).reshape(-1, 2)
+    if dist_coeffs is None or len(dist_coeffs) == 0 or not np.any(np.asarray(dist_coeffs)):
+        return uv.copy()
+    import cv2
+    K = np.asarray(K, dtype=np.float64)
+    d = np.asarray(dist_coeffs, dtype=np.float64).reshape(-1)
+    out = cv2.undistortPoints(uv.reshape(-1, 1, 2), K, d, P=K)
+    return out.reshape(-1, 2)
+
+
 # ---------------------------------------------------------------------------
 # 3. MULTI-VIEW TRIANGULATION (DIRECT LINEAR TRANSFORM)
 # ---------------------------------------------------------------------------

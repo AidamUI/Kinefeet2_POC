@@ -44,3 +44,7 @@ triangulation:
   # all. Two is the mathematical minimum for triangulation; a higher value
   # is more robust but may exclude some joints.
   min_views: 2
+  # Remove lens distortion (cameras.json dist_coeffs) from the 2D detections
+  # before triangulating. Has no effect for cameras without distortion
+  # coefficients (the assumed-ring rig).
+  undistort: true

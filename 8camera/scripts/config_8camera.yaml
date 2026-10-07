@@ -38,3 +38,7 @@ triangulation:
   # A landmark needs at least this many usable photos to be triangulated at
   # all. With 8 cameras, 3 views gives good reliability.
   min_views: 3
+  # Remove lens distortion (cameras.json dist_coeffs) from the 2D detections
+  # before triangulating. Has no effect for cameras without distortion
+  # coefficients (the assumed-ring rig).
+  undistort: true
