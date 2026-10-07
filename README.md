@@ -123,6 +123,14 @@ Kinefeet2_POC/
 └── smpl_models/            # Optional: for SMPL-X mesh generation
 ```
 
+**Photos and results are not in the repository.** Input photos (`*/data/`),
+calibration photos, and every per-pose result (`*/output*/*/pose*/`,
+`*/output*/*/sequence/`, calibration debug images) are git-ignored, because the
+people in the images did not agree to appear in a public repository. Put your own
+photos in the `data/` folders and run the pipelines to regenerate results.
+`cameras.json` (calibration numbers) is kept. Do not remove these ignore rules,
+and do not post photos or annotated images from real subjects in issues or pull requests.
+
 Most users should start with `4camera/` or `8camera/`, which wrap the
 scripts in `scripts/` with a ready-made configuration for that number of
 cameras. The root `data/`, `output/` and `config.yaml` belong to the generic

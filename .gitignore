@@ -107,9 +107,30 @@ site/
 sensitive_information/
 presentations/
 
-# Generated viewer / large artefacts of the global stage (regenerate with scripts/run_global.py)
-*/output*/*/sequence/*.rrd
-*/output*/*/sequence/smplx_interactive.html
-*/output*/*/sequence/smplx/*.ply
-*/output*/*/sequence/opensim/*.osim
-*/output*/*/sequence/opensim/Model_Pose2Sim_simple.osim
+# ---------------------------------------------------------------------------
+# PRIVACY: photos of people and everything derived from them are never committed.
+# The people in the images did not agree to appear in a public repository.
+# Kept on purpose: PUT_PHOTOS_HERE.txt / .gitkeep placeholders and cameras.json
+# (calibration numbers only).
+# ---------------------------------------------------------------------------
+# input photos and video, anywhere under a data/ folder (also calibration photos)
+**/data/**/*.jpg
+**/data/**/*.jpeg
+**/data/**/*.png
+**/data/**/*.JPG
+**/data/**/*.JPEG
+**/data/**/*.PNG
+**/data/**/*.bmp
+**/data/**/*.tif
+**/data/**/*.tiff
+**/data/**/*.mp4
+**/data/**/*.mov
+**/data/**/*.avi
+# per-pose results (annotated photos, reprojection images, meshes, joint files)
+# and the global-stage results (sequence/: meshes, viewer, joint angles)
+/4camera/output*/*/pose*/
+/4camera/output*/*/sequence/
+/8camera/output*/*/pose*/
+/8camera/output*/*/sequence/
+# calibration debug images show the board and the people holding it
+/camera_calibration/output/debug/
