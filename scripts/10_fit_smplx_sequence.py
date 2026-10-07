@@ -30,7 +30,7 @@ automatically:
   3. pip install smplx torch trimesh
 
 USAGE   python scripts/10_fit_smplx_sequence.py <rig_output_dir> [--version full_body]
-                                                 [--gender neutral] [--model-dir smpl_models]
+                                                 [--gender male] [--model-dir smpl_models]
 
 INPUT   <rig_output_dir>/<version>/sequence/joints_world.npz   (script 09)
 OUTPUT  <rig_output_dir>/<version>/sequence/smplx_world.npz
@@ -275,7 +275,8 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("rig_output_dir")
     ap.add_argument("--version", default="full_body", choices=["full_body", "waist_down"])
-    ap.add_argument("--gender", default="neutral", choices=["neutral", "male", "female"])
+    ap.add_argument("--gender", default="male", choices=["neutral", "male", "female"],
+                    help="SMPL-X template; changes only the body surface, not the joint fit (default: male)")
     ap.add_argument("--reproj-weight", type=float, default=REPROJ_WEIGHT,
                     help="weight of the 2D reprojection term (0 = 3D joints only)")
     ap.add_argument("--model-dir", default=os.path.join(HERE, "..", "smpl_models"))

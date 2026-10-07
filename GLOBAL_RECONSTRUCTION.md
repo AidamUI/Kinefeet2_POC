@@ -73,6 +73,10 @@ and the file says so.
 
 ## Known limits
 
+- The SMPL-X body surface is a generic template (male by default, `--gender` or
+  `--smplx-gender` switches it). Only the joint positions are measured; the chest,
+  waist and hip shape of the mesh are not the subject's real shape. Do not present
+  the mesh as a body scan.
 - MediaPipe gives 3 points per foot, so ankle flexion is usable but subtalar
   (inversion/eversion) and toe angles are weakly constrained.
 - Scale is only as good as the calibration. The calibrated 4-camera run gives

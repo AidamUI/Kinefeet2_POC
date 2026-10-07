@@ -284,6 +284,12 @@ synchronized video: see `DEVELOPMENT.md`.
    `consistency.json` (bone lengths and foot height) and `opensim/ik_report.json`
    (marker error in cm and joint angles).
 
+The SMPL-X body surface is a generic template (male by default; `--smplx-gender
+female|neutral` switches it). Only the joint positions are measured, and joint
+error is about the same for the male and neutral templates (2.4 and 2.4 cm
+average on the calibrated 4-camera poses), so the choice changes the look of the
+mesh, not the angles. Do not present the mesh as the subject's real body shape.
+
 On a rig without calibration (`output_uncalibrated/`, `8camera/`) the world frame
 is an assumed ring: the viewer still works, but heights and sizes are not metric.
 
