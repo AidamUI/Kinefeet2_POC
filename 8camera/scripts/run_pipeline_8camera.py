@@ -9,12 +9,15 @@ degrees, through the same numbered scripts 4camera/ uses.
 
 Note: uses config_8camera.yaml for configuration.
 
-Camera positions are assumed from config_8camera.yaml, not measured:
-03_setup_camera_rig.py builds an approximate ring from typed-in
-radius/height/field-of-view numbers. There is no calibrated option for
-8camera the way there is for 4camera (see camera_calibration/README.md and
-4camera/README.md). Every distance in the 3D output is only as accurate as
-those numbers.
+Camera positions come from one of two places, decided per version
+(full_body / waist_down) by what is in 8camera/output/<version>/cameras.json:
+
+  * a real calibration, if camera_calibration/export_cameras.py wrote it there
+    (see camera_calibration/README.md, "Calibrating the 8-camera rig"). Step 03
+    then keeps it untouched, and the results are metric.
+  * otherwise an approximate ring: 03_setup_camera_rig.py builds it from the
+    typed-in radius/height/field-of-view numbers in config_8camera.yaml. Every
+    distance in the 3D output is then only as accurate as those numbers.
 
 Steps run, per version (full_body / waist_down) that has photos:
     1. 02_extract_2d_keypoints.py   MediaPipe 2D keypoints from the 8 photos
@@ -51,11 +54,6 @@ def main():
     print("=" * 70)
     print("8-CAMERA PIPELINE FOR KINEFEET 2.0")
     print("=" * 70)
-    print(
-        "\n[!] Camera positions are assumed from config_8camera.yaml, not measured.\n"
-        "    Every distance in the 3D output is only as accurate as those\n"
-        "    typed-in radius/height numbers."
-    )
     common.print_photo_naming()
 
     versions = common.versions_with_data()
@@ -65,6 +63,17 @@ def main():
         sys.exit(1)
 
     output_path = os.path.join(common.EIGHT_CAM_ROOT, "output")
+    for version in versions:
+        cameras_json = os.path.join(output_path, version, "cameras.json")
+        if common.is_calibrated(cameras_json):
+            print(f"\n{version}: using the measured calibration in {cameras_json}")
+        else:
+            print(
+                f"\n[!] {version}: camera positions are ASSUMED from config_8camera.yaml, not measured.\n"
+                "    Every distance in the 3D output is only as accurate as those typed-in\n"
+                "    radius/height numbers. Calibrate for metric results: see\n"
+                "    camera_calibration/README.md, 'Calibrating the 8-camera rig'."
+            )
     print(f"\nVersions with photos: {', '.join(versions)}")
     print(f"Output will go to: {output_path}\n")
 

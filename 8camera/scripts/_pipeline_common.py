@@ -45,6 +45,29 @@ if PARENT_SCRIPT_DIR not in sys.path:
     sys.path.insert(0, PARENT_SCRIPT_DIR)
 
 
+# Must match camera_calibration/export_cameras.py (SOURCE_MARKER) and the same
+# check in scripts/03_setup_camera_rig.py. Duplicated because the rig folders and
+# camera_calibration/ are independent script sets with no shared package.
+CALIBRATED_SOURCE_MARKER = "camera_calibration/export_cameras.py"
+
+
+def is_calibrated(cameras_json_path):
+    """True if cameras.json at this path came from a real calibration."""
+    if not os.path.exists(cameras_json_path):
+        return False
+    try:
+        import json
+
+        with open(cameras_json_path) as f:
+            cameras = json.load(f)
+        return any(
+            isinstance(cam, dict) and cam.get("source") == CALIBRATED_SOURCE_MARKER
+            for cam in cameras.values()
+        )
+    except (ValueError, OSError, AttributeError):
+        return False
+
+
 def versions_with_data():
     """Which of full_body / waist_down have any capture photos under 8camera/data/."""
     found = []
